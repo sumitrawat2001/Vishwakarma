@@ -1,0 +1,178 @@
+﻿{% extends 'base.html' %}
+{% block title %}House Planner{% endblock %}
+{% block content %}
+<div class="planner-app">
+  <header class="planner-top">
+    <div>
+      <p class="eyebrow">SMART HOUSE / FLOOR PLAN STUDIO</p>
+      <h1>Design your <em>space.</em></h1>
+    </div>
+    <div class="planner-actions">
+      <button class="editor-button" id="reset-layout" type="button">Reset</button>
+      <button class="editor-button filled" type="submit" form="planner-form">Save plan <span>→</span></button>
+    </div>
+  </header>
+
+  <div class="planner-visual-grid" aria-label="Project inspiration gallery">
+    <article class="visual-card visual-feature">
+      <div class="visual-overlay">
+        <span class="visual-badge">Architectural design</span>
+        <h2>Minimal luxury. Thoughtful planning.</h2>
+      </div>
+    </article>
+
+    <div class="visual-stack">
+      <article class="visual-card small-card card-one">
+        <div class="visual-overlay">
+          <span>Quiet luxury</span>
+        </div>
+      </article>
+      <article class="visual-card small-card card-two">
+        <div class="visual-overlay">
+          <span>Design clarity</span>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="planner-luxury-bar" aria-label="Property highlight summary">
+    <div class="stat-card">
+      <span class="stat-label">Residence</span>
+      <strong>Contemporary villa</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Concept</span>
+      <strong>Open & airy</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Finish</span>
+      <strong>Refined minimal</strong>
+    </div>
+  </div>
+
+  <form id="planner-form" method="post">
+    <input type="hidden" name="save_project" value="1">
+    <div class="planner-workspace">
+      <aside class="planner-sidebar">
+        <div class="side-heading"><strong>Build</strong><span>ROOMS</span></div>
+        <p class="side-note">Add rooms to your canvas and adjust quantities for a simple preliminary plan.</p>
+
+        {% if project %}
+        <div class="project-banner">
+          <strong>Loaded project:</strong> {{ project.project_name }}
+        </div>
+        {% endif %}
+
+        <div class="room-palette">
+          {% for room in rooms %}
+          <button type="button" class="room-tool" data-room="{{ room }}">
+            <span class="room-icon">+</span>
+            <span>{{ room }}</span>
+            <b>{% if project and project.rooms and project.rooms.get(room) %}{{ project.rooms.get(room) }}{% else %}+{% endif %}</b>
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="side-control">
+          <label>Floors
+            <select id="floor-selector" name="floors">
+              {% for level in [1,2,3,4,5] %}
+              <option value="{{ level }}" {% if result and result.floors == level %}selected{% elif project and project.floors == level %}selected{% elif level == 1 %}selected{% endif %}>{{ level }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>Unit
+            <select id="unit-selector" name="unit">
+              <option value="ft" {% if (result and result.unit == 'ft') or (project and project.unit == 'ft') or not project and not result %}selected{% endif %}>ft</option>
+              <option value="meter" {% if (result and result.unit == 'meter') or (project and project.unit == 'meter') %}selected{% endif %}>meter</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="side-control side-stack">
+          <label>Project name
+            <input id="project-name" name="project_name" type="text" value="{{ project.project_name if project else 'New plan' }}" placeholder="Project name" />
+          </label>
+          <label>Plot length
+            <input id="plot-length" name="plot_length" type="number" min="1" step="1" value="{{ project.plot_length if project else (result.length if result else 30) }}" />
+          </label>
+          <label>Plot width
+            <input id="plot-width" name="plot_width" type="number" min="1" step="1" value="{{ project.plot_width if project else (result.width if result else 40) }}" />
+          </label>
+        </div>
+
+        <div class="side-dimension-panel">
+          {% for room in rooms %}
+          {% set room_dims = (project.room_dimensions.get(room) if project and project.room_dimensions else {}) %}
+          {% set room_width = room_dims.width if room_dims and room_dims.width is defined else 12 %}
+          {% set room_depth = room_dims.depth if room_dims and room_dims.depth is defined else 10 %}
+          {% set room_count = (project.rooms.get(room) if project and project.rooms else 0) %}
+          <div class="room-dim-card">
+            <strong>{{ room }}</strong>
+            <label>Width
+              <input class="room-dim-input" type="number" min="4" step="0.1" value="{{ room_width }}" data-room="{{ room }}" data-dimension="width" name="room_width_{{ room }}">
+            </label>
+            <label>Depth
+              <input class="room-dim-input" type="number" min="4" step="0.1" value="{{ room_depth }}" data-room="{{ room }}" data-dimension="depth" name="room_depth_{{ room }}">
+            </label>
+            <input type="hidden" id="form-room-{{ room | replace(' ', '-') | replace('/', '-') | replace('.', '') }}" name="room_{{ room }}" value="{{ room_count }}">
+          </div>
+          {% endfor %}
+        </div>
+      </aside>
+
+      <section class="canvas-panel">
+        <div class="canvas-toolbar">
+          <span><i class="status-dot"></i> <span id="view-mode-label">2D plan view</span></span>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <button type="button" id="view-toggle" class="mini-toggle">3D View</button>
+            <button type="button" id="roof-toggle" class="mini-toggle">Roof: On</button>
+            <button type="button" id="walls-only-toggle" class="mini-toggle">Walls only: Off</button>
+            <label class="mini-toggle mini-select">
+              <span>Style</span>
+              <select id="furniture-style">
+                <option value="minimal">Minimal</option>
+                <option value="standard" selected>Standard</option>
+                <option value="luxury">Luxury</option>
+              </select>
+            </label>
+            <label class="mini-toggle mini-select">
+              <span>Floor</span>
+              <select id="floor-level">
+                <option value="all" selected>All</option>
+                <option value="ground">Ground</option>
+                <option value="first">First</option>
+              </select>
+            </label>
+            <button type="button" id="grid-toggle" class="mini-toggle">Grid</button>
+            <button type="button" id="zoom-out" class="mini-toggle">−</button>
+            <span id="zoom-level">100%</span>
+            <button type="button" id="zoom-in" class="mini-toggle">+</button>
+          </div>
+        </div>
+
+        <div class="summary-strip">
+          <div class="summary-pill"><span>Plot Area</span><strong id="plot-area">1200 sq ft</strong></div>
+          <div class="summary-pill"><span>Built-up</span><strong id="built-area">840 sq ft</strong></div>
+          <div class="summary-pill"><span>Open Area</span><strong id="open-area">360 sq ft</strong></div>
+        </div>
+
+        <div id="floor-plan" class="floor-plan-wrap">
+          <div class="plan-grid"></div>
+          <svg id="room-layer" viewBox="0 0 720 500" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+
+        <div id="3d-canvas" class="canvas-3d" style="display:none"></div>
+      </section>
+    </div>
+
+    <div class="planner-hidden-fields" style="display:none;">
+      <input type="hidden" id="form-project-name" name="form_project_name" value="New plan">
+      <input type="hidden" id="form-plot-length" name="form_plot_length" value="30">
+      <input type="hidden" id="form-plot-width" name="form_plot_width" value="40">
+      <input type="hidden" id="form-unit" name="form_unit" value="ft">
+      <input type="hidden" id="form-floors" name="form_floors" value="1">
+    </div>
+  </form>
+</div>
+{% endblock %}

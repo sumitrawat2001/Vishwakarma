@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<section class="section admin-shell">
+  <div class="admin-header">
+    <div>
+      <p class="eyebrow">SYSTEM CONTROL</p>
+      <h1>Admin Dashboard</h1>
+    </div>
+    <a class="button primary" href="{{ url_for('dashboard') }}">Back to dashboard</a>
+  </div>
+
+  <div class="dashboard-filters">
+    <button class="filter-pill active" type="button">Overview</button>
+    <button class="filter-pill" type="button">Users</button>
+    <button class="filter-pill" type="button">Projects</button>
+    <button class="filter-pill" type="button">Settings</button>
+  </div>
+
+  <div class="project-summary-grid">
+    <article class="summary-tile tile-project">
+      <div class="tile-icon">👥</div>
+      <div>
+        <span>Total Users</span>
+        <strong>{{ total_users }}</strong>
+      </div>
+    </article>
+    <article class="summary-tile tile-area">
+      <div class="tile-icon">📁</div>
+      <div>
+        <span>Total Projects</span>
+        <strong>{{ total_projects }}</strong>
+      </div>
+    </article>
+    <article class="summary-tile tile-solar">
+      <div class="tile-icon">🛡</div>
+      <div>
+        <span>Role</span>
+        <strong>Admin</strong>
+      </div>
+    </article>
+  </div>
+
+  <div class="panel panel-main">
+    <div class="panel-header">
+      <h2>Recent admin activity</h2>
+    </div>
+    <ul class="status-list">
+      <li><span class="dot green"></span> Access guard enabled for protected admin routes.</li>
+      <li><span class="dot orange"></span> Email, SMS, and WhatsApp OTP channels are supported.</li>
+      <li><span class="dot blue"></span> MongoDB fallback and JSON file backup are active.</li>
+      <li><span class="dot mint"></span> Deployment configuration is present for Render.</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

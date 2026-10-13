@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}Support Agent{% endblock %}
+
+{% block content %}
+<section class="page-shell support-shell">
+    <div class="hero-card narrow">
+        <h1>Vishwakarma AI</h1>
+        <p>Ask about any planner, estimator, calculator, project, report, simulation, or deployment feature. You can write in English, Hindi, Hinglish, or another language supported by the configured AI model.</p>
+    </div>
+
+    <div class="support-layout">
+        <div class="panel support-panel">
+            <div class="support-header">
+                <h2>Vishwakarma AI chat</h2>
+                <span class="status-pill" id="support-status">{% if response and response.source == 'ai' %}Live AI{% else %}Project-aware AI{% endif %}</span>
+            </div>
+
+            <div class="chat-window" id="support-chat-window" aria-live="polite">
+                {% if chat_history %}
+                    {% for message in chat_history %}
+                        <div class="chat-bubble {% if message.role == 'user' %}user-bubble{% else %}assistant-bubble{% endif %}">
+                            <span class="bubble-label">{% if message.role == 'user' %}You{% else %}Vishwakarma AI{% endif %}</span>
+                            <p>{{ message.text }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="chat-bubble assistant-bubble welcome-bubble">
+                        <span class="bubble-label">Vishwakarma AI</span>
+                        <p>Hello! I can explain this application's planners, calculators, simulations, saved projects, reports, and troubleshooting. Ask in English, Hindi, or Hinglish.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <form method="post" class="support-form" id="support-chat-form" data-support-chat>
+                <label for="question">Describe the issue</label>
+                <textarea id="question" name="question" rows="4" placeholder="Ask in English, Hindi, or Hinglish. Example: mera 3D view nahi chal raha">{{ question }}</textarea>
+                <p class="support-error" id="support-error" role="alert" hidden></p>
+                <button class="primary-btn" id="support-send" type="submit">Ask Vishwakarma AI</button>
+            </form>
+        </div>
+
+        <div class="panel training-panel">
+            <h2>Train the agent</h2>
+            <form method="post" class="stacked-form">
+                <label for="train_question">New customer question</label>
+                <input id="train_question" name="train_question" type="text" placeholder="Example: roof not showing correctly">
+
+                <label for="train_answer">Recommended answer</label>
+                <textarea id="train_answer" name="train_answer" rows="4" placeholder="Answer for future support cases"></textarea>
+
+                <label for="train_category">Category</label>
+                <input id="train_category" name="train_category" type="text" placeholder="planner, account, deployment">
+
+                <button class="secondary-btn" type="submit">Train agent</button>
+            </form>
+
+            <div class="knowledge-box">
+                <h3>Current knowledge base</h3>
+                <ul class="knowledge-list">
+                    {% for faq in knowledge.get('faqs', []) %}
+                    <li>
+                        <strong>{{ faq.category }}</strong>
+                        <span>{{ faq.keywords | join(', ') }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="knowledge-box ticket-box">
+                <h3>Support log</h3>
+                <p class="tiny-note">Recent support chats are stored locally so future updates can be reviewed and retrained.</p>
+                {% if chat_history %}
+                <ul class="mini-log">
+                    {% for item in chat_history[-3:] %}
+                    <li>{{ item.role }}: {{ item.text[:90] }}{% if item.text|length > 90 %}...{% endif %}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="tiny-note">No chat activity yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/support.js') }}"></script>
+
+<style>
+    .support-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+    }
+
+    .support-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        margin-top: 24px;
+    }
+
+    .support-panel,
+    .training-panel {
+        border-radius: 24px;
+        border: 1px solid rgba(237, 107, 66, 0.2);
+        background: rgba(255,255,255,0.86);
+        box-shadow: 0 18px 40px rgba(16, 33, 53, 0.08);
+        padding: 22px;
+    }
+
+    .support-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .status-pill {
+        background: linear-gradient(135deg, #ed6b42, #ff9f6b);
+        color: white;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .chat-window {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 320px;
+        max-height: 460px;
+        overflow-y: auto;
+        padding: 16px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f7f5ef, #f2f7fb);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        margin-bottom: 18px;
+    }
+
+    .chat-bubble {
+        max-width: 80%;
+        padding: 14px 16px;
+        border-radius: 18px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .chat-bubble p {
+        margin: 8px 0 0;
+        white-space: pre-wrap;
+    }
+
+    .chat-bubble small {
+        display: block;
+        margin-top: 8px;
+        color: #53657a;
+    }
+
+    .user-bubble {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #ed6b42, #ff8e68);
+        color: white;
+    }
+
+    .assistant-bubble {
+        align-self: flex-start;
+        background: white;
+        border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .bubble-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.85;
+    }
+
+    .welcome-bubble {
+        background: linear-gradient(135deg, #f9fbff, #edf4ff);
+    }
+
+    .support-form,
+    .stacked-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .support-form textarea,
+    .stacked-form textarea,
+    .stacked-form input {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        padding: 12px 14px;
+        font: inherit;
+        resize: vertical;
+        background: white;
+    }
+
+    .support-form button,
+    .stacked-form button {
+        margin-top: 8px;
+    }
+
+    .support-error {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff0ed;
+        color: #9b3d2a;
+        font-size: 0.9rem;
+    }
+
+    .support-loading {
+        opacity: 0.7;
+    }
+
+    .training-panel h2 {
+        margin-bottom: 18px;
+    }
+
+    .knowledge-box {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .knowledge-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .knowledge-list li {
+        background: #f8fafc;
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .ticket-box {
+        margin-top: 18px;
+    }
+
+    .tiny-note {
+        font-size: 12px;
+        color: #53657a;
+    }
+
+    .mini-log {
+        list-style: none;
+        margin: 10px 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .mini-log li {
+        background: #f1f7ff;
+        border-radius: 10px;
+        padding: 8px 10px;
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        font-size: 13px;
+        color: #243a53;
+    }
+
+    @media (max-width: 900px) {
+        .support-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .chat-bubble {
+            max-width: 94%;
+        }
+    }
+</style>
+{% endblock %}

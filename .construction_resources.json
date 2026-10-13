@@ -1,0 +1,576 @@
+{
+  "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28": [
+    {
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mason",
+      "role": "Mason",
+      "rate": 850,
+      "user_id": "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28",
+      "resource_type": "labour",
+      "updated_at": "2026-09-24T10:17:08.519034",
+      "_id": "f70c70aa-6bf7-44e9-ad9d-0767f8cbe259",
+      "created_at": "2026-09-24T10:17:08.499278"
+    },
+    {
+      "quantity": 0,
+      "reorder_level": 0,
+      "name": "Cement",
+      "unit": "bag",
+      "unit_cost": 420,
+      "user_id": "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28",
+      "resource_type": "materials",
+      "updated_at": "2026-09-24T10:17:08.561416",
+      "_id": "9393bb6b-ef4a-4ca3-97e0-c3efa3acf45c",
+      "created_at": "2026-09-24T10:17:08.534098"
+    },
+    {
+      "category": "general",
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mixer",
+      "rate": 1200,
+      "user_id": "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28",
+      "resource_type": "equipment",
+      "updated_at": "2026-09-24T10:17:08.597030",
+      "_id": "c7fff12a-0089-45c6-af40-37b96da4eb06",
+      "created_at": "2026-09-24T10:17:08.576432"
+    },
+    {
+      "status": "todo",
+      "priority": "medium",
+      "title": "Foundation inspection",
+      "user_id": "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28",
+      "resource_type": "tasks",
+      "updated_at": "2026-09-24T10:17:08.632019",
+      "_id": "bb5fade4-d8e0-4312-aaaa-c392e498ea29",
+      "created_at": "2026-09-24T10:17:08.612258"
+    },
+    {
+      "category": "general",
+      "date": "",
+      "description": "Site transport",
+      "amount": 2500,
+      "user_id": "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28",
+      "resource_type": "expenses",
+      "updated_at": "2026-09-24T10:17:08.663076",
+      "_id": "f4302b9b-595d-423e-9266-e87dec0f0860",
+      "created_at": "2026-09-24T10:17:08.645545"
+    },
+    {
+      "url": "",
+      "notes": "",
+      "name": "Soil report",
+      "document_type": "report",
+      "user_id": "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28",
+      "resource_type": "documents",
+      "updated_at": "2026-09-24T10:17:08.692937",
+      "_id": "d46b47b8-b9c8-4883-9df7-e57302f3349a",
+      "created_at": "2026-09-24T10:17:08.677019"
+    },
+    {
+      "status": "draft",
+      "due_date": "",
+      "invoice_number": "INV-001",
+      "vendor": "Supplier",
+      "amount": 15000,
+      "user_id": "resource-user-58ef05b6ac33458fbc361b7bcc0d9b28",
+      "resource_type": "invoices",
+      "updated_at": "2026-09-24T10:17:08.720336",
+      "_id": "4ea4c734-7a80-4911-922a-2a093167bebb",
+      "created_at": "2026-09-24T10:17:08.705650"
+    }
+  ],
+  "resource-user-88a34a9f145942b1a5dc246e75854d7b": [
+    {
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mason",
+      "role": "Mason",
+      "rate": 850,
+      "user_id": "resource-user-88a34a9f145942b1a5dc246e75854d7b",
+      "resource_type": "labour",
+      "updated_at": "2026-09-24T10:18:17.728515",
+      "_id": "e6c59866-978d-4f58-8369-0d4c6840f9d8",
+      "created_at": "2026-09-24T10:18:17.712747"
+    },
+    {
+      "quantity": 0,
+      "reorder_level": 0,
+      "name": "Cement",
+      "unit": "bag",
+      "unit_cost": 420,
+      "user_id": "resource-user-88a34a9f145942b1a5dc246e75854d7b",
+      "resource_type": "materials",
+      "updated_at": "2026-09-24T10:18:17.752999",
+      "_id": "2711871c-015e-45a7-bf7b-486a2dc5e5a8",
+      "created_at": "2026-09-24T10:18:17.739949"
+    },
+    {
+      "category": "general",
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mixer",
+      "rate": 1200,
+      "user_id": "resource-user-88a34a9f145942b1a5dc246e75854d7b",
+      "resource_type": "equipment",
+      "updated_at": "2026-09-24T10:18:17.779735",
+      "_id": "e55b39ef-b34b-4ea8-b0ae-4a524b748005",
+      "created_at": "2026-09-24T10:18:17.763570"
+    },
+    {
+      "status": "todo",
+      "priority": "medium",
+      "title": "Foundation inspection",
+      "user_id": "resource-user-88a34a9f145942b1a5dc246e75854d7b",
+      "resource_type": "tasks",
+      "updated_at": "2026-09-24T10:18:17.803962",
+      "_id": "2a8ad87c-880e-49fe-8253-dd6196b87452",
+      "created_at": "2026-09-24T10:18:17.790632"
+    },
+    {
+      "category": "general",
+      "date": "",
+      "description": "Site transport",
+      "amount": 2500,
+      "user_id": "resource-user-88a34a9f145942b1a5dc246e75854d7b",
+      "resource_type": "expenses",
+      "updated_at": "2026-09-24T10:18:17.826210",
+      "_id": "0528ae4f-79a2-4f1e-ab6d-f867216f756a",
+      "created_at": "2026-09-24T10:18:17.813688"
+    },
+    {
+      "url": "",
+      "notes": "",
+      "name": "Soil report",
+      "document_type": "report",
+      "user_id": "resource-user-88a34a9f145942b1a5dc246e75854d7b",
+      "resource_type": "documents",
+      "updated_at": "2026-09-24T10:18:17.848477",
+      "_id": "44200a50-a733-4f85-a825-9b4a99546b1e",
+      "created_at": "2026-09-24T10:18:17.836274"
+    },
+    {
+      "status": "draft",
+      "due_date": "",
+      "invoice_number": "INV-001",
+      "vendor": "Supplier",
+      "amount": 15000,
+      "user_id": "resource-user-88a34a9f145942b1a5dc246e75854d7b",
+      "resource_type": "invoices",
+      "updated_at": "2026-09-24T10:18:17.869824",
+      "_id": "fc5bcf70-8fef-493a-adc3-036e582e580a",
+      "created_at": "2026-09-24T10:18:17.857076"
+    }
+  ],
+  "resource-user-a84dd56575af4f75ae1809c50b3a43d8": [
+    {
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mason",
+      "role": "Mason",
+      "rate": 850,
+      "user_id": "resource-user-a84dd56575af4f75ae1809c50b3a43d8",
+      "resource_type": "labour",
+      "updated_at": "2026-09-24T10:21:56.601278",
+      "_id": "a5654e0b-a7da-48b7-9be1-01255257230a",
+      "created_at": "2026-09-24T10:21:56.574760"
+    },
+    {
+      "quantity": 0,
+      "reorder_level": 0,
+      "name": "Cement",
+      "unit": "bag",
+      "unit_cost": 420,
+      "user_id": "resource-user-a84dd56575af4f75ae1809c50b3a43d8",
+      "resource_type": "materials",
+      "updated_at": "2026-09-24T10:21:56.635423",
+      "_id": "6d2a70b7-38fb-4357-af5e-6be515f5c52f",
+      "created_at": "2026-09-24T10:21:56.618092"
+    },
+    {
+      "category": "general",
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mixer",
+      "rate": 1200,
+      "user_id": "resource-user-a84dd56575af4f75ae1809c50b3a43d8",
+      "resource_type": "equipment",
+      "updated_at": "2026-09-24T10:21:56.663867",
+      "_id": "66e08174-a4d6-481d-833f-f876c4446d4f",
+      "created_at": "2026-09-24T10:21:56.647964"
+    },
+    {
+      "status": "todo",
+      "priority": "medium",
+      "title": "Foundation inspection",
+      "user_id": "resource-user-a84dd56575af4f75ae1809c50b3a43d8",
+      "resource_type": "tasks",
+      "updated_at": "2026-09-24T10:21:56.693420",
+      "_id": "e6ccf59f-5adb-4e86-bc2d-443de422b24c",
+      "created_at": "2026-09-24T10:21:56.678101"
+    },
+    {
+      "category": "general",
+      "date": "",
+      "description": "Site transport",
+      "amount": 2500,
+      "user_id": "resource-user-a84dd56575af4f75ae1809c50b3a43d8",
+      "resource_type": "expenses",
+      "updated_at": "2026-09-24T10:21:56.719930",
+      "_id": "294c67d9-f893-42af-ab83-25c23eb6297c",
+      "created_at": "2026-09-24T10:21:56.706204"
+    },
+    {
+      "url": "",
+      "notes": "",
+      "name": "Soil report",
+      "document_type": "report",
+      "user_id": "resource-user-a84dd56575af4f75ae1809c50b3a43d8",
+      "resource_type": "documents",
+      "updated_at": "2026-09-24T10:21:56.742493",
+      "_id": "1db9873f-1705-4703-b155-ccd9c79762a9",
+      "created_at": "2026-09-24T10:21:56.729797"
+    },
+    {
+      "status": "draft",
+      "due_date": "",
+      "invoice_number": "INV-001",
+      "vendor": "Supplier",
+      "amount": 15000,
+      "user_id": "resource-user-a84dd56575af4f75ae1809c50b3a43d8",
+      "resource_type": "invoices",
+      "updated_at": "2026-09-24T10:21:56.767286",
+      "_id": "d9d408e2-7990-46d0-8679-586e7af0cb10",
+      "created_at": "2026-09-24T10:21:56.753896"
+    }
+  ],
+  "resource-user-977fc0e311854c7483348c4a45a6460a": [
+    {
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mason",
+      "role": "Mason",
+      "rate": 850,
+      "user_id": "resource-user-977fc0e311854c7483348c4a45a6460a",
+      "resource_type": "labour",
+      "updated_at": "2026-09-24T10:23:40.604494",
+      "_id": "d5cf9199-05c6-4af8-b251-5e03bad0d339",
+      "created_at": "2026-09-24T10:23:40.590021"
+    },
+    {
+      "quantity": 0,
+      "reorder_level": 0,
+      "name": "Cement",
+      "unit": "bag",
+      "unit_cost": 420,
+      "user_id": "resource-user-977fc0e311854c7483348c4a45a6460a",
+      "resource_type": "materials",
+      "updated_at": "2026-09-24T10:23:40.628709",
+      "_id": "0c6d5341-100d-4949-bc66-d619d4a02978",
+      "created_at": "2026-09-24T10:23:40.614788"
+    },
+    {
+      "category": "general",
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mixer",
+      "rate": 1200,
+      "user_id": "resource-user-977fc0e311854c7483348c4a45a6460a",
+      "resource_type": "equipment",
+      "updated_at": "2026-09-24T10:23:40.650593",
+      "_id": "497aa030-b8de-4a66-ac72-d67cd2af509b",
+      "created_at": "2026-09-24T10:23:40.638722"
+    },
+    {
+      "status": "todo",
+      "priority": "medium",
+      "title": "Foundation inspection",
+      "user_id": "resource-user-977fc0e311854c7483348c4a45a6460a",
+      "resource_type": "tasks",
+      "updated_at": "2026-09-24T10:23:40.673821",
+      "_id": "917b8c82-0b68-4bc8-8157-5134d95f185f",
+      "created_at": "2026-09-24T10:23:40.660895"
+    },
+    {
+      "category": "general",
+      "date": "",
+      "description": "Site transport",
+      "amount": 2500,
+      "user_id": "resource-user-977fc0e311854c7483348c4a45a6460a",
+      "resource_type": "expenses",
+      "updated_at": "2026-09-24T10:23:40.699479",
+      "_id": "6c71873f-af13-41a4-8f13-6dd2778e8346",
+      "created_at": "2026-09-24T10:23:40.685936"
+    },
+    {
+      "url": "",
+      "notes": "",
+      "name": "Soil report",
+      "document_type": "report",
+      "user_id": "resource-user-977fc0e311854c7483348c4a45a6460a",
+      "resource_type": "documents",
+      "updated_at": "2026-09-24T10:23:40.723452",
+      "_id": "dd131a1e-4d1c-449f-973c-096af5b53a9b",
+      "created_at": "2026-09-24T10:23:40.709484"
+    },
+    {
+      "status": "draft",
+      "due_date": "",
+      "invoice_number": "INV-001",
+      "vendor": "Supplier",
+      "amount": 15000,
+      "user_id": "resource-user-977fc0e311854c7483348c4a45a6460a",
+      "resource_type": "invoices",
+      "updated_at": "2026-09-24T10:23:40.747180",
+      "_id": "d41c3a25-ad3b-4a61-845f-dada0507e4d4",
+      "created_at": "2026-09-24T10:23:40.733246"
+    }
+  ],
+  "resource-user-ffb82137f1e84dceb998703fd260703e": [
+    {
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mason",
+      "role": "Mason",
+      "rate": 850,
+      "user_id": "resource-user-ffb82137f1e84dceb998703fd260703e",
+      "resource_type": "labour",
+      "updated_at": "2026-09-24T10:30:42.198393",
+      "_id": "5ba65f09-526d-4cd7-a80e-6cfb36185dcd",
+      "created_at": "2026-09-24T10:30:42.183574"
+    },
+    {
+      "quantity": 0,
+      "reorder_level": 0,
+      "name": "Cement",
+      "unit": "bag",
+      "unit_cost": 420,
+      "user_id": "resource-user-ffb82137f1e84dceb998703fd260703e",
+      "resource_type": "materials",
+      "updated_at": "2026-09-24T10:30:42.226000",
+      "_id": "11657ea0-4c56-41ea-beca-f43fb6561710",
+      "created_at": "2026-09-24T10:30:42.211539"
+    },
+    {
+      "category": "general",
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mixer",
+      "rate": 1200,
+      "user_id": "resource-user-ffb82137f1e84dceb998703fd260703e",
+      "resource_type": "equipment",
+      "updated_at": "2026-09-24T10:30:42.252790",
+      "_id": "7518a105-5d81-4951-b3a3-085f3a63c714",
+      "created_at": "2026-09-24T10:30:42.238128"
+    },
+    {
+      "status": "todo",
+      "priority": "medium",
+      "title": "Foundation inspection",
+      "user_id": "resource-user-ffb82137f1e84dceb998703fd260703e",
+      "resource_type": "tasks",
+      "updated_at": "2026-09-24T10:30:42.278992",
+      "_id": "c0940afb-5a40-47a1-9b69-227986c48e07",
+      "created_at": "2026-09-24T10:30:42.264750"
+    },
+    {
+      "category": "general",
+      "date": "",
+      "description": "Site transport",
+      "amount": 2500,
+      "user_id": "resource-user-ffb82137f1e84dceb998703fd260703e",
+      "resource_type": "expenses",
+      "updated_at": "2026-09-24T10:30:42.305520",
+      "_id": "2ecb953a-65ef-4ce5-b52a-b68aff3c211b",
+      "created_at": "2026-09-24T10:30:42.291448"
+    },
+    {
+      "url": "",
+      "notes": "",
+      "name": "Soil report",
+      "document_type": "report",
+      "user_id": "resource-user-ffb82137f1e84dceb998703fd260703e",
+      "resource_type": "documents",
+      "updated_at": "2026-09-24T10:30:42.330607",
+      "_id": "ac74e04d-efe2-4910-be58-eb493c725a15",
+      "created_at": "2026-09-24T10:30:42.315655"
+    },
+    {
+      "status": "draft",
+      "due_date": "",
+      "invoice_number": "INV-001",
+      "vendor": "Supplier",
+      "amount": 15000,
+      "user_id": "resource-user-ffb82137f1e84dceb998703fd260703e",
+      "resource_type": "invoices",
+      "updated_at": "2026-09-24T10:30:42.356843",
+      "_id": "65c664c1-1700-4e82-bc0f-a9586b19c240",
+      "created_at": "2026-09-24T10:30:42.343729"
+    }
+  ],
+  "resource-user-3406340688184fe1ad04d3e1bd0e72c9": [
+    {
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mason",
+      "role": "Mason",
+      "rate": 850,
+      "user_id": "resource-user-3406340688184fe1ad04d3e1bd0e72c9",
+      "resource_type": "labour",
+      "updated_at": "2026-09-30T09:19:03.968480",
+      "_id": "1b186180-3a30-49f3-aecd-74fe2857e6fe",
+      "created_at": "2026-09-30T09:19:03.954272"
+    },
+    {
+      "quantity": 0,
+      "reorder_level": 0,
+      "name": "Cement",
+      "unit": "bag",
+      "unit_cost": 420,
+      "user_id": "resource-user-3406340688184fe1ad04d3e1bd0e72c9",
+      "resource_type": "materials",
+      "updated_at": "2026-09-30T09:19:03.997978",
+      "_id": "0a8568f9-9cfb-47ff-923d-d4c1f8d8514b",
+      "created_at": "2026-09-30T09:19:03.980665"
+    },
+    {
+      "category": "general",
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mixer",
+      "rate": 1200,
+      "user_id": "resource-user-3406340688184fe1ad04d3e1bd0e72c9",
+      "resource_type": "equipment",
+      "updated_at": "2026-09-30T09:19:04.027491",
+      "_id": "40380a4b-4d38-4eb8-909c-2faf988865b2",
+      "created_at": "2026-09-30T09:19:04.011830"
+    },
+    {
+      "status": "todo",
+      "priority": "medium",
+      "title": "Foundation inspection",
+      "user_id": "resource-user-3406340688184fe1ad04d3e1bd0e72c9",
+      "resource_type": "tasks",
+      "updated_at": "2026-09-30T09:19:04.052524",
+      "_id": "1cdabe72-1f46-457f-b159-a5fe29c835d5",
+      "created_at": "2026-09-30T09:19:04.037507"
+    },
+    {
+      "category": "general",
+      "date": "",
+      "description": "Site transport",
+      "amount": 2500,
+      "user_id": "resource-user-3406340688184fe1ad04d3e1bd0e72c9",
+      "resource_type": "expenses",
+      "updated_at": "2026-09-30T09:19:04.078364",
+      "_id": "ce73c0a4-38f7-4df2-a7d2-e32b9da2516c",
+      "created_at": "2026-09-30T09:19:04.063897"
+    },
+    {
+      "url": "",
+      "notes": "",
+      "name": "Soil report",
+      "document_type": "report",
+      "user_id": "resource-user-3406340688184fe1ad04d3e1bd0e72c9",
+      "resource_type": "documents",
+      "updated_at": "2026-09-30T09:19:04.103619",
+      "_id": "e3f6f8fd-1113-4fb7-bf8c-850bcb0cf787",
+      "created_at": "2026-09-30T09:19:04.090274"
+    },
+    {
+      "status": "draft",
+      "due_date": "",
+      "invoice_number": "INV-001",
+      "vendor": "Supplier",
+      "amount": 15000,
+      "user_id": "resource-user-3406340688184fe1ad04d3e1bd0e72c9",
+      "resource_type": "invoices",
+      "updated_at": "2026-09-30T09:19:04.129883",
+      "_id": "5a96d5df-076e-4e73-9f2f-b19c0cc0c94f",
+      "created_at": "2026-09-30T09:19:04.116191"
+    }
+  ],
+  "resource-user-0bed36ac6518405180a4b366c7e782f4": [
+    {
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mason",
+      "role": "Mason",
+      "rate": 850,
+      "user_id": "resource-user-0bed36ac6518405180a4b366c7e782f4",
+      "resource_type": "labour",
+      "updated_at": "2026-10-13T05:03:58.638393",
+      "_id": "4b8d1416-7584-4abb-bf51-808ed45f0ee9",
+      "created_at": "2026-10-13T05:03:58.620714"
+    },
+    {
+      "quantity": 0,
+      "reorder_level": 0,
+      "name": "Cement",
+      "unit": "bag",
+      "unit_cost": 420,
+      "user_id": "resource-user-0bed36ac6518405180a4b366c7e782f4",
+      "resource_type": "materials",
+      "updated_at": "2026-10-13T05:03:58.666403",
+      "_id": "0b384811-a1cb-4396-8b0d-84ab56f8f8da",
+      "created_at": "2026-10-13T05:03:58.650674"
+    },
+    {
+      "category": "general",
+      "unit": "day",
+      "quantity": 1,
+      "name": "Mixer",
+      "rate": 1200,
+      "user_id": "resource-user-0bed36ac6518405180a4b366c7e782f4",
+      "resource_type": "equipment",
+      "updated_at": "2026-10-13T05:03:58.694464",
+      "_id": "05e429e1-5da2-48a4-b5ba-09d20f89f048",
+      "created_at": "2026-10-13T05:03:58.679835"
+    },
+    {
+      "status": "todo",
+      "priority": "medium",
+      "title": "Foundation inspection",
+      "user_id": "resource-user-0bed36ac6518405180a4b366c7e782f4",
+      "resource_type": "tasks",
+      "updated_at": "2026-10-13T05:03:58.720697",
+      "_id": "565bb30c-309b-4089-b929-a5ac647dd106",
+      "created_at": "2026-10-13T05:03:58.707864"
+    },
+    {
+      "category": "general",
+      "date": "",
+      "description": "Site transport",
+      "amount": 2500,
+      "user_id": "resource-user-0bed36ac6518405180a4b366c7e782f4",
+      "resource_type": "expenses",
+      "updated_at": "2026-10-13T05:03:58.745513",
+      "_id": "544ea063-efd9-4a7b-b40e-02bd749744b3",
+      "created_at": "2026-10-13T05:03:58.732853"
+    },
+    {
+      "url": "",
+      "notes": "",
+      "name": "Soil report",
+      "document_type": "report",
+      "user_id": "resource-user-0bed36ac6518405180a4b366c7e782f4",
+      "resource_type": "documents",
+      "updated_at": "2026-10-13T05:03:58.771602",
+      "_id": "162ffe64-6489-480e-8d11-57aa57524508",
+      "created_at": "2026-10-13T05:03:58.758128"
+    },
+    {
+      "status": "draft",
+      "due_date": "",
+      "invoice_number": "INV-001",
+      "vendor": "Supplier",
+      "amount": 15000,
+      "user_id": "resource-user-0bed36ac6518405180a4b366c7e782f4",
+      "resource_type": "invoices",
+      "updated_at": "2026-10-13T05:03:58.795689",
+      "_id": "51834531-0cdb-4137-89ad-5633026cb931",
+      "created_at": "2026-10-13T05:03:58.783065"
+    }
+  ]
+}

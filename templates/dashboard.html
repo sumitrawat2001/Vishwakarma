@@ -1,0 +1,206 @@
+{% extends 'base.html' %}{% block title %}Dashboard{% endblock %}{% block content %}
+<section class="section dashboard-shell">
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand">
+      <span class="dashboard-brand-mark">V</span>
+      <div>
+        <strong>VISHWAKARMA</strong>
+      </div>
+    </div>
+    <nav class="dashboard-side-nav">
+      <a class="active" href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('planner') }}">House Planner</a>
+      <a href="{{ url_for('materials') }}">Material Estimation</a>
+      <a href="{{ url_for('cost') }}">Cost Estimation</a>
+      <a href="{{ url_for('solar') }}">Solar Calculator</a>
+      <a href="{{ url_for('rainwater') }}">Rainwater Harvesting</a>
+      <a href="{{ url_for('simulation') }}">Simulation Lab</a>
+      <a href="{{ url_for('projects') }}">My Projects</a>
+      <a href="{{ url_for('support') }}">Support</a>
+    </nav>
+  </aside>
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+    <div>
+      <p class="eyebrow">YOUR WORKSPACE</p>
+      <h1>Welcome to VISHWAKARMA</h1>
+      <p class="dashboard-tagline">Plan • Simulate • Build a Sustainable Future</p>
+    </div>
+    <div class="dashboard-header-actions">
+      <div class="dashboard-badge">
+        <span>Planning status</span>
+        <strong>{{ 'Ready' if recent else 'Starts now' }}</strong>
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <span class="theme-toggle-dot">☀</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="hero-dashboard-card">
+    <div class="hero-card-copy">
+      <p class="eyebrow">Construction Simulation Lab</p>
+      <h2>Test a building idea before you build.</h2>
+      <p class="hero-description">Compare materials, costs, solar, and rainwater options in one place.</p>
+      <a class="button primary" href="{{ url_for('simulation') }}">Start Simulation →</a>
+    </div>
+    <div class="hero-card-visual">
+      <span class="hero-stat-label">PROJECTS IN YOUR WORKSPACE</span>
+      <strong>{{ metrics.projects }}</strong>
+      <span>{{ 'Saved concepts ready to continue.' if recent else 'Your first plan can start here.' }}</span>
+      <a href="{{ url_for('projects') }}">View projects <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+
+  <div class="project-summary-grid">
+    <article class="summary-tile tile-area">
+      <div class="tile-icon">📐</div>
+      <div>
+        <span>Total Estimated Cost</span>
+        <strong>{{ metrics.total_cost }}</strong>
+      </div>
+    </article>
+    <article class="summary-tile tile-solar">
+      <div class="tile-icon">☀</div>
+      <div>
+        <span>Estimated Solar Output</span>
+        <strong>{{ metrics.solar_output }}</strong>
+      </div>
+    </article>
+    <article class="summary-tile tile-rain">
+      <div class="tile-icon">💧</div>
+      <div>
+        <span>Water Harvest Potential</span>
+        <strong>{{ metrics.water_potential }}</strong>
+      </div>
+    </article>
+  </div>
+
+  <div class="dashboard-panels">
+    <div class="panel panel-main">
+      <div class="panel-header">
+        <h2>Quick actions</h2>
+      </div>
+      <div class="quick-grid">
+        <a class="button primary" href="{{ url_for('planner') }}">New house plan →</a>
+        <a class="button" href="{{ url_for('materials') }}">Material estimate →</a>
+        <a class="button" href="{{ url_for('cost') }}">Cost calculator →</a>
+        <a class="button" href="{{ url_for('solar') }}">Solar calculator →</a>
+        <a class="button" href="{{ url_for('rainwater') }}">Rainwater calculator →</a>
+      </div>
+    </div>
+
+    <div class="panel panel-side">
+      <div class="panel-header">
+        <h2>Planning pulse</h2>
+      </div>
+      <div class="donut-wrapper">
+        <div class="donut-chart" aria-label="Project mix chart">
+          <div class="donut-center">
+            <strong>74%</strong>
+            <span>Ready</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div><span class="legend-swatch green"></span> Plot</div>
+          <div><span class="legend-swatch orange"></span> Budget</div>
+          <div><span class="legend-swatch blue"></span> Solar</div>
+        </div>
+      </div>
+      <div class="progress-stack">
+        <div class="progress-row">
+          <label>Plot readiness</label>
+          <div class="progress-bar"><span style="width: 88%"></span></div>
+        </div>
+        <div class="progress-row">
+          <label>Material clarity</label>
+          <div class="progress-bar"><span style="width: 76%"></span></div>
+        </div>
+        <div class="progress-row">
+          <label>Solar viability</label>
+          <div class="progress-bar"><span style="width: 63%"></span></div>
+        </div>
+      </div>
+      <ul class="status-list">
+        <li><span class="dot green"></span> Plot sizing ready</li>
+        <li><span class="dot orange"></span> Material estimate active</li>
+        <li><span class="dot blue"></span> Solar fit check available</li>
+        <li><span class="dot mint"></span> Rainwater review enabled</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="dashboard-panels lower">
+    <div class="panel panel-main">
+      <div class="panel-header">
+        <h2>Recent projects</h2>
+        <a href="{{ url_for('projects') }}">View all →</a>
+      </div>
+      {% if recent %}
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Built-up area</th>
+            <th>Updated</th>
+          </tr>
+          {% for item in recent %}
+          <tr>
+            <td><a href="{{ url_for('project_detail', project_id=item._id) }}">{{ item.project_name }}</a></td>
+            <td>{{ item.built_up_area }}</td>
+            <td>{{ item.updated_at.strftime('%d %b %Y') if item.updated_at else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% else %}
+      <div class="dashboard-empty-state">
+        <div>
+          <strong>No saved projects yet</strong>
+          <p class="muted">Start with a house plan and keep your first idea in one place.</p>
+        </div>
+        <a class="button primary" href="{{ url_for('planner') }}">Create house plan <span aria-hidden="true">→</span></a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="panel panel-side">
+      <div class="panel-header">
+        <h2>Best next step</h2>
+      </div>
+      <div class="mini-card">
+        <strong>Design checklist</strong>
+        <p>Review your site area, room mix, and material budget before creating final project documentation.</p>
+      </div>
+      <div class="mini-card">
+        <strong>Average plan size</strong>
+        <p>{{ metrics.avg_area }} sq for each saved concept.</p>
+      </div>
+      <div class="mini-card insight-card">
+        <strong>Insight</strong>
+        <p>Projects with larger open areas tend to have better rainwater capture and later cost flexibility.</p>
+      </div>
+      <div class="mini-card chart-card">
+        <strong>Project trend</strong>
+        <div class="mini-chart" aria-label="Project trend chart">
+          <span style="height: 35%"></span>
+          <span style="height: 52%"></span>
+          <span style="height: 48%"></span>
+          <span style="height: 68%"></span>
+          <span style="height: 82%"></span>
+          <span style="height: 90%"></span>
+        </div>
+        <div class="chart-labels">
+          <span>Jan</span>
+          <span>Feb</span>
+          <span>Mar</span>
+          <span>Apr</span>
+          <span>May</span>
+          <span>Jun</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+{% endblock %}

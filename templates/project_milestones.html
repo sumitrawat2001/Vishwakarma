@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Project Milestones{% endblock %}
+{% block content %}
+<section class="section">
+  <p class="eyebrow">PROJECT TRACKING</p>
+  <h1>Milestones</h1>
+
+  <div class="panel" style="margin-bottom: 20px;">
+    <h2>Add milestone</h2>
+    <form method="post">
+      <div class="form-grid">
+        <label>
+          Title
+          <input type="text" name="title" placeholder="Foundation work" required>
+        </label>
+        <label>
+          Status
+          <select name="status">
+            <option value="planned">Planned</option>
+            <option value="in_progress">In progress</option>
+            <option value="completed">Completed</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        </label>
+        <label>
+          Due date
+          <input type="date" name="due_date">
+        </label>
+      </div>
+      <label>
+        Notes
+        <textarea name="notes" rows="3" placeholder="Supporting notes for this phase..."></textarea>
+      </label>
+      <button class="button primary" type="submit">Add milestone</button>
+    </form>
+  </div>
+
+  {% if milestones %}
+    <div class="project-list">
+      {% for milestone in milestones %}
+        <div class="project-row" style="display:block;">
+          <strong>{{ milestone.title }}</strong>
+          <span>Status: {{ milestone.status|replace('_', ' ')|title }}</span>
+          {% if milestone.due_date %}<span>Due: {{ milestone.due_date }}</span>{% endif %}
+          {% if milestone.notes %}<span>{{ milestone.notes }}</span>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No milestones yet. Define the first construction phase for this project.</p>
+  {% endif %}
+
+  <a class="button" href="{{ url_for('project_detail', project_id=project._id) }}">Back to project</a>
+</section>
+{% endblock %}

@@ -1,0 +1,65 @@
+{
+  "faqs": [
+    {
+      "keywords": [
+        "3d",
+        "three",
+        "view",
+        "render",
+        "canvas"
+      ],
+      "answer": "Open the planner, then use the 3D View button. If the canvas stays blank, refresh the page and ensure the browser allows script execution. The app now includes a safe 3D renderer plus fallback styling.",
+      "category": "planner"
+    },
+    {
+      "keywords": [
+        "login",
+        "sign in",
+        "password",
+        "access"
+      ],
+      "answer": "Use the Log in page with your registered email and password. If you forgot your password, create a new account and then use the same email to access your saved plans.",
+      "category": "account"
+    },
+    {
+      "keywords": [
+        "save",
+        "project",
+        "saved",
+        "planner"
+      ],
+      "answer": "After designing the layout, enter a project name and click Save Project in the planner. Your plan is stored in the project store and can be opened from the Projects dashboard.",
+      "category": "projects"
+    },
+    {
+      "keywords": [
+        "report",
+        "pdf",
+        "download"
+      ],
+      "answer": "Open a saved project and use the Report option to generate a PDF summary. The report includes plot details, built-up area, and a preliminary estimate for review.",
+      "category": "reports"
+    },
+    {
+      "keywords": [
+        "mobile",
+        "phone",
+        "network",
+        "wifi",
+        "install"
+      ],
+      "answer": "The app is configured for mobile and local network access. Run it on 0.0.0.0, confirm the IP/port, and use the browser on the same network. A manifest and service worker are included for installable behavior.",
+      "category": "deployment"
+    },
+    {
+      "keywords": [
+        "mongo",
+        "database",
+        "mongodb",
+        "error"
+      ],
+      "answer": "If MongoDB is unavailable, the app automatically falls back to local JSON stores for auth and project data. You can still use the app while MongoDB is being set up.",
+      "category": "database"
+    }
+  ]
+}

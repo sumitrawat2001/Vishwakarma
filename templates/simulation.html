@@ -1,0 +1,497 @@
+{% extends 'base.html' %}
+{% block title %}Construction Simulation Lab{% endblock %}
+{% block content %}
+<section class="simulation-shell">
+  <div class="simulation-header">
+    <div>
+      <p class="eyebrow">VISHWAKARMA / SIMULATION LAB</p>
+      <h1>Construction Simulation Lab</h1>
+      <p class="simulation-subtitle">Experiment with construction parameters and understand their impact through interactive simulations.</p>
+    </div>
+    <div class="simulation-badges">
+      <span class="status-pill">Indicative / Educational</span>
+      <span class="status-pill status-pill-accent">NEW</span>
+    </div>
+  </div>
+
+  <div class="simulation-disclaimer">
+    Simulation results are indicative and intended for educational and preliminary planning purposes only. They should not replace advice from a licensed architect, structural engineer, quantity surveyor or relevant authority.
+  </div>
+
+  <div class="simulation-grid">
+    <article class="simulation-card" id="material-card">
+      <div class="simulation-card-header">
+        <div>
+          <p class="eyebrow">MATERIAL SIMULATION</p>
+          <h2>Material Simulation</h2>
+        </div>
+        <span class="module-badge">Indicative</span>
+      </div>
+
+      <form id="material-form" class="simulation-form">
+        <div class="form-grid two-col">
+          <label>
+            Concrete Grade
+            <select name="concrete_grade">
+              <option value="M20">M20</option>
+              <option value="M25" selected>M25</option>
+              <option value="M30">M30</option>
+              <option value="M35">M35</option>
+            </select>
+          </label>
+          <label>
+            Cement Grade
+            <select name="cement_grade">
+              <option value="OPC 43">OPC 43</option>
+              <option value="OPC 53" selected>OPC 53</option>
+              <option value="PSC">PSC</option>
+            </select>
+          </label>
+          <label>
+            Steel Grade
+            <select name="steel_grade">
+              <option value="Fe415">Fe415</option>
+              <option value="Fe500" selected>Fe500</option>
+              <option value="Fe550">Fe550</option>
+            </select>
+          </label>
+          <label>
+            Brick Type
+            <select name="brick_type">
+              <option value="Traditional">Traditional</option>
+              <option value="Fly Ash" selected>Fly Ash</option>
+              <option value="AAC">AAC</option>
+            </select>
+          </label>
+          <label>
+            Built-up Area (sq ft)
+            <input type="number" name="area" value="1200" min="1" step="1">
+          </label>
+          <label>
+            Floors
+            <input type="number" name="floors" value="2" min="1" max="5" step="1">
+          </label>
+        </div>
+        <button type="submit" class="primary-button">Run Simulation</button>
+      </form>
+
+      <div class="result-panel" id="material-results">
+        <div class="metric-card">
+          <span>Indicative Strength</span>
+          <strong id="material-strength">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Estimated Material Cost</span>
+          <strong id="material-cost">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Durability Indicator</span>
+          <strong id="material-durability">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Overall Result</span>
+          <strong id="material-result">—</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="simulation-card" id="load-card">
+      <div class="simulation-card-header">
+        <div>
+          <p class="eyebrow">LOAD SIMULATION</p>
+          <h2>Load Simulation</h2>
+        </div>
+        <span class="module-badge module-badge-warn">Educational</span>
+      </div>
+
+      <form id="load-form" class="simulation-form">
+        <div class="form-grid one-col">
+          <label>
+            Load Type
+            <select name="load_type">
+              <option value="Live Load" selected>Live Load</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Occupancy">Occupancy</option>
+            </select>
+          </label>
+          <label>
+            Load Value
+            <input type="range" name="load_value" min="10" max="200" value="60">
+            <div class="slider-value"><span>Current</span><strong id="load-value-readout">60</strong></div>
+          </label>
+        </div>
+        <button type="submit" class="primary-button">Run Simulation</button>
+      </form>
+
+      <div class="load-panel">
+        <div class="load-building" data-load-state="medium">
+          <div class="load-building-base"></div>
+          <div class="load-building-body"></div>
+          <div class="load-building-sway"></div>
+        </div>
+        <div class="result-panel compact-grid">
+          <div class="metric-card">
+            <span>Stress Indicator</span>
+            <strong id="load-stress">—</strong>
+          </div>
+          <div class="metric-card">
+            <span>Stress Level</span>
+            <strong id="load-level">—</strong>
+          </div>
+          <div class="metric-card full-span">
+            <span>Simulation Result</span>
+            <strong id="load-result">—</strong>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="simulation-card" id="rainwater-card">
+      <div class="simulation-card-header">
+        <div>
+          <p class="eyebrow">RAINWATER HARVESTING</p>
+          <h2>Rainwater Harvesting Simulation</h2>
+        </div>
+        <span class="module-badge module-badge-success">Potential</span>
+      </div>
+
+      <form id="rainwater-form" class="simulation-form">
+        <div class="form-grid two-col">
+          <label>
+            Roof Area (sq ft)
+            <input type="number" name="roof_area" value="950" min="1" step="1">
+          </label>
+          <label>
+            Rainfall (mm)
+            <input type="number" name="rainfall" value="1200" min="1" step="1">
+          </label>
+          <label>
+            Runoff Coefficient
+            <input type="number" name="runoff_coefficient" value="0.8" min="0.1" max="1" step="0.05">
+          </label>
+          <label>
+            Tank Capacity (litres)
+            <input type="number" name="tank_capacity" value="1800" min="0" step="1">
+          </label>
+        </div>
+        <button type="submit" class="primary-button">Run Simulation</button>
+      </form>
+
+      <div class="rainwater-flow">
+        <div class="flow-node">Rain</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node">Roof</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node">Collection Pipe</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node">Filter</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node">Storage Tank</div>
+      </div>
+
+      <div class="result-panel compact-grid">
+        <div class="metric-card">
+          <span>Estimated Water Collected</span>
+          <strong id="rainwater-collected">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Monthly Potential</span>
+          <strong id="rainwater-monthly">—</strong>
+        </div>
+        <div class="metric-card full-span">
+          <span>Tank Status</span>
+          <strong id="rainwater-tank">—</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="simulation-card" id="solar-card">
+      <div class="simulation-card-header">
+        <div>
+          <p class="eyebrow">SOLAR SIMULATION</p>
+          <h2>Solar Simulation</h2>
+        </div>
+        <span class="module-badge module-badge-success">Renewable</span>
+      </div>
+
+      <form id="solar-form" class="simulation-form">
+        <div class="form-grid two-col">
+          <label>
+            Location
+            <select name="location">
+              <option value="Location A" selected>Location A</option>
+              <option value="Location B">Location B</option>
+              <option value="Location C">Location C</option>
+            </select>
+          </label>
+          <label>
+            Monthly Electricity Usage (kWh)
+            <input type="number" name="monthly_usage" value="450" min="1" step="1">
+          </label>
+          <label>
+            Solar Panel Wattage
+            <input type="number" name="wattage" value="400" min="100" step="50">
+          </label>
+          <label>
+            Sunlight Hours
+            <input type="number" name="sunlight_hours" value="5" min="1" max="12" step="0.5">
+          </label>
+        </div>
+        <button type="submit" class="primary-button">Run Simulation</button>
+      </form>
+
+      <div class="solar-visual">
+        <div class="solar-panel-wrap">
+          <div class="solar-panel"></div>
+          <div class="solar-sun"></div>
+        </div>
+      </div>
+
+      <div class="result-panel compact-grid">
+        <div class="metric-card">
+          <span>Estimated Capacity</span>
+          <strong id="solar-capacity">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Number of Panels</span>
+          <strong id="solar-panels">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Daily Generation</span>
+          <strong id="solar-daily">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Monthly Generation</span>
+          <strong id="solar-monthly">—</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="simulation-card" id="cost-card">
+      <div class="simulation-card-header">
+        <div>
+          <p class="eyebrow">CONSTRUCTION COST SIMULATION</p>
+          <h2>Construction Cost Simulation</h2>
+        </div>
+        <span class="module-badge">Estimate</span>
+      </div>
+
+      <form id="cost-form" class="simulation-form">
+        <div class="cost-grid">
+          <label>
+            Cement
+            <input type="range" name="cement" data-adjustment-key="cement" min="-20" max="20" value="10">
+          </label>
+          <label>
+            Steel
+            <input type="range" name="steel" data-adjustment-key="steel" min="-20" max="20" value="15">
+          </label>
+          <label>
+            Bricks
+            <input type="range" name="bricks" data-adjustment-key="bricks" min="-20" max="20" value="-5">
+          </label>
+          <label>
+            Labour
+            <input type="range" name="labour" data-adjustment-key="labour" min="-20" max="20" value="5">
+          </label>
+        </div>
+        <button type="submit" class="primary-button">Run Simulation</button>
+      </form>
+
+      <div class="result-panel compact-grid">
+        <div class="metric-card">
+          <span>Base Cost</span>
+          <strong id="cost-base">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Material Cost</span>
+          <strong id="cost-material">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Labour Cost</span>
+          <strong id="cost-labour">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Contingency</span>
+          <strong id="cost-contingency">—</strong>
+        </div>
+        <div class="metric-card full-span">
+          <span>Total Estimated Cost</span>
+          <strong id="cost-total">—</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="simulation-card" id="whatif-card">
+      <div class="simulation-card-header">
+        <div>
+          <p class="eyebrow">WHAT-IF SIMULATOR</p>
+          <h2>What-If Simulator</h2>
+        </div>
+        <span class="module-badge module-badge-accent">Scenario</span>
+      </div>
+
+      <form id="whatif-form" class="simulation-form">
+        <div class="form-grid two-col">
+          <label>
+            Plot Length (ft)
+            <input type="number" name="plot_length" value="30" min="1" step="1">
+          </label>
+          <label>
+            Plot Width (ft)
+            <input type="number" name="plot_width" value="40" min="1" step="1">
+          </label>
+          <label>
+            Floors
+            <input type="number" name="floors" value="1" min="1" max="5" step="1">
+          </label>
+          <label>
+            Built-up Area (sq ft)
+            <input type="number" name="built_up_area" value="840" min="1" step="1">
+          </label>
+          <label>
+            Material Choice
+            <select name="material_choice">
+              <option value="Traditional">Traditional</option>
+              <option value="Fly Ash" selected>Fly Ash</option>
+              <option value="AAC">AAC</option>
+            </select>
+          </label>
+          <label>
+            Solar Wattage (W)
+            <input type="number" name="solar_wattage" value="400" min="100" step="50">
+          </label>
+          <label>
+            Rainfall (mm)
+            <input type="number" name="rainfall" value="1200" min="1" step="1">
+          </label>
+          <label>
+            Sunlight Hours
+            <input type="number" name="sunlight_hours" value="6" min="1" max="12" step="0.5">
+          </label>
+        </div>
+        <button type="submit" class="primary-button">Run Simulation</button>
+      </form>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <span>Before</span>
+          <strong id="whatif-before-area">—</strong>
+          <small>Built-up area</small>
+        </div>
+        <div class="compare-card">
+          <span>After</span>
+          <strong id="whatif-after-area">—</strong>
+          <small>Built-up area</small>
+        </div>
+      </div>
+
+      <div class="result-panel compact-grid">
+        <div class="metric-card">
+          <span>Estimated Material Requirement</span>
+          <strong id="whatif-materials">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Estimated Construction Cost</span>
+          <strong id="whatif-cost">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Solar Potential</span>
+          <strong id="whatif-solar">—</strong>
+        </div>
+        <div class="metric-card">
+          <span>Rainwater Potential</span>
+          <strong id="whatif-rainwater">—</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="simulation-card" id="visualization-card">
+      <div class="simulation-card-header">
+        <div>
+          <p class="eyebrow">3D VISUALIZATION</p>
+          <h2>3D Building Visualization</h2>
+        </div>
+        <span class="module-badge">Prototype</span>
+      </div>
+
+      <div class="viz-toolbar">
+        <div class="view-tabs">
+          <button class="view-tab active" type="button" data-view="front">Front</button>
+          <button class="view-tab" type="button" data-view="side">Side</button>
+          <button class="view-tab" type="button" data-view="top">Top</button>
+        </div>
+        <label>
+          Floor Selection
+          <select id="visual-floor-select">
+            <option value="all">All floors</option>
+            <option value="1">1 floor</option>
+            <option value="2">2 floors</option>
+            <option value="3">3 floors</option>
+            <option value="4">4 floors</option>
+          </select>
+        </label>
+        <label>
+          Building Style
+          <select id="visual-style-select">
+            <option value="modern">Modern</option>
+            <option value="eco">Eco</option>
+            <option value="classic">Classic</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="building-visualization">
+        <div class="visual-building front" id="visual-building" data-floor-count="4">
+          <div class="visual-floor floor-1"><span>Floor 1</span></div>
+          <div class="visual-floor floor-2"><span>Floor 2</span></div>
+          <div class="visual-floor floor-3"><span>Floor 3</span></div>
+          <div class="visual-floor floor-4"><span>Floor 4</span></div>
+          <div class="visual-roof"><span>Roof</span></div>
+          <div class="column-grid">
+            <span class="column column-a"></span>
+            <span class="column column-b"></span>
+            <span class="column column-c"></span>
+            <span class="column column-d"></span>
+          </div>
+          <div class="load-badges">
+            <span class="load-badge load-badge-top">Load</span>
+            <span class="load-badge load-badge-mid">Column</span>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  {% if session.get('user_id') %}
+  <div class="simulation-save-panel">
+    <div class="simulation-action-header">
+      <div>
+        <p class="eyebrow">PROJECT SAVE</p>
+        <h2>Save Simulation to Project</h2>
+      </div>
+      <button type="button" id="export-simulation-report" class="secondary-button export-button">Export simulation report</button>
+    </div>
+
+    {% if projects %}
+    <form id="save-simulation-form" class="save-form">
+      <label>
+        Select Project
+        <select id="simulation-project-select">
+          {% for project in projects %}
+          <option value="{{ project._id }}">{{ project.project_name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit" class="secondary-button">Save Simulation to Project</button>
+    </form>
+    {% else %}
+    <div class="empty-state-panel">
+      <p>No saved projects yet. Create a project in the planner first, then save this simulation.</p>
+      <a class="button primary" href="{{ url_for('planner') }}">Create project</a>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

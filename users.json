@@ -1,0 +1,16 @@
+{
+  "guest@example.com": {
+    "_id": "194352cb-647e-44f0-9ac1-17e74f5cff73",
+    "id": "194352cb-647e-44f0-9ac1-17e74f5cff73",
+    "name": "Guest User",
+    "email": "guest@example.com",
+    "phone": "+911234567890",
+    "password_hash": "scrypt:32768:8:1$K1tUreiLbhHnCDyT$220c6ea5ca956839a2f8ba7a6ec0dcb1d692f0589f3ba5bf8a39457636563f19c0a22c0daccd1cb5907c7346578b24a9045d35ad1db35ee39880b56a3707c4e6",
+    "email_verified": false,
+    "mobile_verified": false,
+    "verification_codes": {},
+    "reset_token": null,
+    "reset_expires": null,
+    "created_at": "2026-09-15T17:08:06.265205"
+  }
+}

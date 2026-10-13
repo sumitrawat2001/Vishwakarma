@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Design Alternatives{% endblock %}
+{% block content %}
+<section class="section">
+  <p class="eyebrow">PROJECT OPTIONS</p>
+  <h1>Design alternatives</h1>
+
+  {% if alternatives %}
+    <div class="panel" style="margin-bottom: 20px;">
+      <h2>Cost comparison</h2>
+      <div class="comparison-chart" style="display:flex; align-items:flex-end; gap:12px; min-height:160px; margin-top:16px;">
+        {% for alt in alternatives %}
+          {% set bar_height = 30 + (alt.total_cost / chart_max * 100) if chart_max else 30 %}
+          <div style="flex:1; text-align:center;">
+            <div style="height:{{ bar_height }}px; background: {% if recommended and alt._id == recommended._id %}#2ecc71{% else %}#ed6b42{% endif %}; border-radius: 8px 8px 0 0; display:flex; align-items:flex-end; justify-content:center; color:white; font-size:12px; padding-bottom:8px;">₹{{ '{:,.0f}'.format(alt.total_cost) }}</div>
+            <div style="margin-top:8px; font-weight:600;">{{ alt.name }}</div>
+            {% if recommended and alt._id == recommended._id %}<div style="color:#2ecc71; font-size:12px;">Recommended</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="panel" style="margin-bottom: 20px;">
+    <h2>Add alternative</h2>
+    <form method="post">
+      <div class="form-grid">
+        <label>
+          Name
+          <input type="text" name="name" placeholder="Option A" required>
+        </label>
+        <label>
+          Status
+          <select name="status">
+            <option value="concept">Concept</option>
+            <option value="recommended">Recommended</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </label>
+        <label>
+          Built-up area
+          <input type="number" min="0" step="0.01" name="built_up_area" value="{{ project.built_up_area or 0 }}">
+        </label>
+      </div>
+      <div class="form-grid">
+        <label>
+          Materials cost
+          <input type="number" min="0" step="0.01" name="materials_cost" value="0">
+        </label>
+        <label>
+          Labour cost
+          <input type="number" min="0" step="0.01" name="labour_cost" value="0">
+        </label>
+        <label>
+          Other cost
+          <input type="number" min="0" step="0.01" name="other_cost" value="0">
+        </label>
+      </div>
+      <label>
+        Description
+        <textarea name="description" rows="3" placeholder="Explain key differences, materials or layout approach..."></textarea>
+      </label>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <button class="button primary" type="submit">Save alternative</button>
+        {% if alternatives %}
+          <a class="button" href="{{ url_for('project_alternatives_excel', project_id=project._id) }}">Export Excel</a>
+          <a class="button" href="{{ url_for('project_alternatives_report_pdf', project_id=project._id) }}">Export PDF</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  {% if alternatives %}
+    <div class="project-list">
+      {% for alt in alternatives %}
+        <div class="project-row" style="display:block; {% if recommended and alt._id == recommended._id %}border: 2px solid #2ecc71; background:#f0fff5;{% endif %};">
+          <strong>{{ alt.name }} {% if recommended and alt._id == recommended._id %}(Recommended){% endif %}</strong>
+          <span>Status: {{ alt.status|title }}</span>
+          <span>Area: {{ alt.built_up_area }} sq units</span>
+          <span>Materials: ₹{{ '{:,.0f}'.format(alt.materials_cost) }} | Labour: ₹{{ '{:,.0f}'.format(alt.labour_cost) }} | Other: ₹{{ '{:,.0f}'.format(alt.other_cost) }}</span>
+          <span>Total: ₹{{ '{:,.0f}'.format(alt.total_cost) }}</span>
+          {% if alt.description %}<span>{{ alt.description }}</span>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No alternatives recorded yet. Compare your first concept against another design option.</p>
+  {% endif %}
+
+  <a class="button" href="{{ url_for('project_detail', project_id=project._id) }}">Back to project</a>
+</section>
+{% endblock %}

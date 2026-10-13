@@ -1,0 +1,52 @@
+[
+  {
+    "id": "6c418ff8-7684-4594-8abb-971e4b85aacf",
+    "session_id": "session-e8150093-25b0-4227-bff6-52c8aa91f861",
+    "created_at": "2026-09-19T10:50:28.867209Z",
+    "payload": {
+      "question": "What materials are required to construct a 1000 sq ft house?",
+      "answer": "I could not find an exact match, but this app supports login, dashboard, project saving, report generation, 3D planner navigation, mobile/network use, and deployment checks. Please describe the issue and I can help narrow it down.",
+      "status": "fallback"
+    }
+  },
+  {
+    "id": "dc3b912d-bdf0-4d47-9ede-ce6423e5d266",
+    "session_id": "session-e8150093-25b0-4227-bff6-52c8aa91f861",
+    "created_at": "2026-09-19T10:51:12.143784Z",
+    "payload": {
+      "question": "you know hindi",
+      "answer": "I could not find an exact match, but this app supports login, dashboard, project saving, report generation, 3D planner navigation, mobile/network use, and deployment checks. Please describe the issue and I can help narrow it down.",
+      "status": "fallback"
+    }
+  },
+  {
+    "id": "9dd2ed3a-f882-4532-86f4-7eb6c260231e",
+    "session_id": "session-e8150093-25b0-4227-bff6-52c8aa91f861",
+    "created_at": "2026-09-19T11:00:43.105034Z",
+    "payload": {
+      "question": "you know hindi",
+      "answer": "I could not find an exact match, but this app supports login, dashboard, project saving, report generation, 3D planner navigation, mobile/network use, and deployment checks. Please describe the issue and I can help narrow it down.",
+      "status": "fallback"
+    }
+  },
+  {
+    "id": "0d9a1fb6-4d2a-4074-bf75-d1cf35c164cd",
+    "session_id": "session-e8150093-25b0-4227-bff6-52c8aa91f861",
+    "created_at": "2026-09-19T11:00:49.338155Z",
+    "payload": {
+      "question": "you know hindi",
+      "answer": "I could not find an exact match, but this app supports login, dashboard, project saving, report generation, 3D planner navigation, mobile/network use, and deployment checks. Please describe the issue and I can help narrow it down.",
+      "status": "fallback"
+    }
+  },
+  {
+    "id": "7705e12a-d38d-4f47-9e58-93f52ce3eab7",
+    "session_id": "session-e8150093-25b0-4227-bff6-52c8aa91f861",
+    "created_at": "2026-09-19T11:01:49.105240Z",
+    "payload": {
+      "question": "hello",
+      "answer": "I could not find an exact match, but this app supports login, dashboard, project saving, report generation, 3D planner navigation, mobile/network use, and deployment checks. Please describe the issue and I can help narrow it down.",
+      "status": "fallback"
+    }
+  }
+]
