@@ -7,7 +7,18 @@ from unittest.mock import patch
 
 from werkzeug.security import generate_password_hash
 
-from app import FileProjectStore, FileUserStore, SupportAgent, SupportConversationStore, SupportTicketStore, PROJECT_STORE_PATH, USER_STORE_PATH, app
+from app import FileProjectStore, FileUserStore, SupportAgent, SupportConversationStore, SupportTicketStore, PROJECT_STORE_PATH, USER_STORE_PATH, app, mongo
+
+
+class MongoConnectionTests(unittest.TestCase):
+    def test_requests_do_not_close_the_shared_mongo_client(self):
+        client = app.test_client()
+
+        with patch.object(mongo.cx, 'close') as close_client:
+            self.assertEqual(client.get('/login').status_code, 200)
+            self.assertEqual(client.get('/login').status_code, 200)
+
+        close_client.assert_not_called()
 
 
 class FileUserStoreTests(unittest.TestCase):
@@ -391,12 +402,13 @@ class SupportAgentTests(unittest.TestCase):
         })
 
         try:
-            response = client.post(f"/project/{created['_id']}/milestones", data={
-                'title': 'Foundation work',
-                'status': 'in_progress',
-                'due_date': '2026-10-15',
-                'notes': 'Excavate and pour raft footing.'
-            }, follow_redirects=False)
+            with patch('app.get_project_store', return_value=project_store):
+                response = client.post(f"/project/{created['_id']}/milestones", data={
+                    'title': 'Foundation work',
+                    'status': 'in_progress',
+                    'due_date': '2026-10-15',
+                    'notes': 'Excavate and pour raft footing.'
+                }, follow_redirects=False)
             self.assertIn(response.status_code, {200, 302})
 
             project = project_store.find_one({'user_id': 'user-1', '_id': created['_id']})
@@ -426,22 +438,24 @@ class SupportAgentTests(unittest.TestCase):
         })
 
         try:
-            response = client.post(f"/project/{created['_id']}/alternatives", data={
-                'name': 'Option A',
-                'description': 'Compact 2BHK',
-                'built_up_area': '950',
-                'materials_cost': '1800000',
-                'labour_cost': '900000',
-                'other_cost': '250000',
-                'status': 'recommended'
-            }, follow_redirects=False)
-            self.assertIn(response.status_code, {200, 302})
+            with patch('app.get_project_store', return_value=project_store):
+                response = client.post(f"/project/{created['_id']}/alternatives", data={
+                    'name': 'Option A',
+                    'description': 'Compact 2BHK',
+                    'built_up_area': '950',
+                    'materials_cost': '1800000',
+                    'labour_cost': '900000',
+                    'other_cost': '250000',
+                    'status': 'recommended'
+                }, follow_redirects=False)
+                self.assertIn(response.status_code, {200, 302})
 
-            page_response = client.get(f"/project/{created['_id']}/alternatives")
+                page_response = client.get(f"/project/{created['_id']}/alternatives")
             self.assertEqual(page_response.status_code, 200)
             self.assertIn('Recommended', page_response.get_data(as_text=True))
 
-            export_response = client.get(f"/project/{created['_id']}/alternatives.xlsx")
+            with patch('app.get_project_store', return_value=project_store):
+                export_response = client.get(f"/project/{created['_id']}/alternatives.xlsx")
             self.assertEqual(export_response.status_code, 200)
             self.assertIn('xlsx', export_response.headers.get('Content-Disposition', '').lower())
 

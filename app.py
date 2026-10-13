@@ -1,3 +1,4 @@
+import atexit
 import base64
 import io
 import json
@@ -40,15 +41,8 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'development-only-change-me')
 app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/smart_house_planner?serverSelectionTimeoutMS=2000')
 mongo = PyMongo()
 mongo.init_app(app, uri=app.config['MONGO_URI'])
+atexit.register(mongo.cx.close)
 
-
-@app.teardown_appcontext
-def shutdown_mongo_client(exception=None):
-    if hasattr(mongo, 'cx'):
-        try:
-            mongo.cx.close()
-        except Exception:
-            pass
 
 @app.route('/manifest.webmanifest')
 def pwa_manifest():
@@ -2622,8 +2616,7 @@ def support_api():
 @app.route('/health')
 def health():
     try:
-        users = db_collection('users')
-        db_available = users is not None
+        db_available = _mongo_available()
         return jsonify({
             'status': 'ok',
             'service': 'smart-house-planner',
