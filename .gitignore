@@ -1,4 +1,5 @@
 .env
+.env.example
 .users.json
 .projects.json
 __pycache__/
