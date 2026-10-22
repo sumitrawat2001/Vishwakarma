@@ -1,1 +1,50 @@
-{% extends 'base.html' %}{% block title %}{% if mode == 'register' %}Create account{% elif mode == 'forgot_password' %}Forgot password{% elif mode == 'reset_password' %}Reset password{% elif mode == 'verify_account' %}Verify account{% else %}Log in{% endif %}{% endblock %}{% block content %}<section class="auth-wrap"><div class="auth-intro"><p class="eyebrow">SMART HOUSE / ACCOUNT</p><h1>{% if mode == 'register' %}Start with a stronger plan.{% elif mode == 'forgot_password' %}Reset your password.{% elif mode == 'reset_password' %}Create a new password.{% elif mode == 'verify_account' %}Verify your account.{% else %}Welcome back.{% endif %}</h1><p>{% if mode == 'register' %}Keep your preliminary plans, calculations, and reports together.{% elif mode == 'verify_account' %}Verify your email or mobile number before continuing to the dashboard.{% else %}Keep your preliminary plans, calculations, and reports together.{% endif %}</p></div><form class="form-panel" method="post">{% if mode == 'register' %}<label>Full name<input name="name" required></label>{% endif %}{% if mode == 'verify_account' %}<label>Email<input type="email" name="email" value="{{ user_email or '' }}" required></label><label>Verification method<select name="method"><option value="email">Email</option><option value="mobile">Mobile SMS</option><option value="whatsapp">WhatsApp</option></select></label><p class="helper-text">Choose WhatsApp to send the OTP to the registered mobile number through the Twilio WhatsApp API.</p><label>Verification code<input type="text" name="code" placeholder="Enter 6-digit code"></label><button class="button primary" name="action" value="verify" type="submit">Verify account <span>→</span></button><button class="button secondary" name="action" value="send" type="submit" formnovalidate>Send code</button>{% elif mode == 'forgot_password' %}<label>Email<input type="email" name="email" required></label><button class="button primary" type="submit">Send reset link <span>→</span></button>{% elif mode == 'reset_password' %}<label>New password<input type="password" name="password" minlength="8" required></label><label>Confirm new password<input type="password" name="confirm_password" minlength="8" required></label><button class="button primary" type="submit">Update password <span>→</span></button>{% else %}<label>Email<input type="email" name="email" required></label><label>Password<input type="password" name="password" minlength="8" required></label>{% if mode == 'register' %}<label>Phone<input type="tel" name="phone" required></label><label>Confirm password<input type="password" name="confirm_password" minlength="8" required></label>{% endif %}<button class="button primary" type="submit">{{ 'Create account' if mode == 'register' else 'Log in' }} <span>→</span></button><p class="form-note"><a href="{{ url_for('forgot_password') }}">Forgot password?</a></p>{% endif %}{% if mode == 'register' %}<p class="form-note">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>{% elif mode == 'login' %}<p class="form-note">New here? <a href="{{ url_for('register') }}">Create an account</a></p>{% elif mode == 'forgot_password' %}<p class="form-note"><a href="{{ url_for('login') }}">Back to log in</a></p>{% elif mode == 'reset_password' %}<p class="form-note"><a href="{{ url_for('login') }}">Back to log in</a></p>{% elif mode == 'verify_account' %}<p class="form-note"><a href="{{ url_for('login') }}">Back to log in</a></p>{% endif %}</form></section>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}
+  {% if mode == 'register' %}Create account
+  {% elif mode == 'forgot_password' %}Forgot password
+  {% elif mode == 'reset_password' %}Reset password
+  {% else %}Log in{% endif %}
+{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-intro">
+    <p class="eyebrow">SMART HOUSE / ACCOUNT</p>
+    <h1>
+      {% if mode == 'register' %}Start with a stronger plan.
+      {% elif mode == 'forgot_password' %}Reset your password.
+      {% elif mode == 'reset_password' %}Create a new password.
+      {% else %}Welcome back.{% endif %}
+    </h1>
+    <p>Keep your preliminary plans, calculations, and reports together.</p>
+  </div>
+  <form class="form-panel" method="post">
+    {% if mode == 'register' %}
+      <label>Full name<input name="name" required></label>
+    {% endif %}
+    {% if mode == 'forgot_password' %}
+      <label>Email<input type="email" name="email" required></label>
+      <button class="button primary" type="submit">Send reset link <span>→</span></button>
+    {% elif mode == 'reset_password' %}
+      <label>New password<input type="password" name="password" minlength="8" required></label>
+      <label>Confirm new password<input type="password" name="confirm_password" minlength="8" required></label>
+      <button class="button primary" type="submit">Update password <span>→</span></button>
+    {% else %}
+      <label>Email<input type="email" name="email" required></label>
+      <label>Password<input type="password" name="password" minlength="8" required></label>
+      {% if mode == 'register' %}
+        <label>Phone<input type="tel" name="phone" required></label>
+        <label>Confirm password<input type="password" name="confirm_password" minlength="8" required></label>
+      {% endif %}
+      <button class="button primary" type="submit">{{ 'Create account' if mode == 'register' else 'Log in' }} <span>→</span></button>
+      <p class="form-note"><a href="{{ url_for('forgot_password') }}">Forgot password?</a></p>
+    {% endif %}
+    {% if mode == 'register' %}
+      <p class="form-note">No verification code needed. Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+    {% elif mode == 'login' %}
+      <p class="form-note">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+    {% elif mode == 'forgot_password' or mode == 'reset_password' %}
+      <p class="form-note"><a href="{{ url_for('login') }}">Back to log in</a></p>
+    {% endif %}
+  </form>
+</section>
+{% endblock %}

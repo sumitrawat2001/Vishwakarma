@@ -38,7 +38,13 @@ load_dotenv()
 logger = logging.getLogger('vishwakarma_ai')
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'development-only-change-me')
-app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/smart_house_planner?serverSelectionTimeoutMS=2000')
+app.config['MONGO_URI'] = (os.getenv('MONGO_URI') or 'mongodb://localhost:27017/smart_house_planner?serverSelectionTimeoutMS=2000').strip() or 'mongodb://localhost:27017/smart_house_planner?serverSelectionTimeoutMS=2000'
+
+
+class DatabaseUnavailableError(RuntimeError):
+    pass
+
+
 mongo = PyMongo()
 mongo.init_app(app, uri=app.config['MONGO_URI'])
 atexit.register(mongo.cx.close)
@@ -173,7 +179,7 @@ VISHWAKARMA_PROJECT_KNOWLEDGE = {
     'purpose': 'A Flask application for preliminary house planning, material and cost estimation, renewable-water planning, saved projects, reports, sharing, and educational simulations.',
     'modules': {
         'overview': 'Home and About explain the product and its preliminary-estimate scope.',
-        'account': 'Register, login, password reset, and optional email/mobile verification are available. File JSON stores are used when MongoDB is unavailable.',
+        'account': 'Register and log in with an email and password; no account verification code is required. File JSON stores are used when MongoDB is unavailable.',
         'dashboard': 'Shows recent saved projects, built-up area, indicative cost, solar output, and rainwater potential.',
         'planner': 'Planner accepts plot length, plot width, unit, floors, room counts, and room dimensions. It computes plot area, 70% preliminary coverage, built-up area, and open area, and can save a project.',
         'visualization': 'Planner includes a 2D layout workflow and a 3D View control with front, side, top, floor selection, and building style controls.',
@@ -212,7 +218,7 @@ AI_LOCAL_ANSWERS = {
     'simulation': 'Simulation Lab contains Material, Load, Solar, Rainwater, Cost, What-if, and 3D visualization modules. It is for educational and preliminary planning only, not professional certification.',
     'projects': 'Use Save Project in Planner to create a saved project. Saved projects can be opened and edited, reported as PDF, shared, commented on, assigned team members, and reviewed through version history.',
     'reports': 'Open a saved project and choose Report. The report page provides the project summary and the PDF report route for download.',
-    'account': 'Use Register to create an account and Log in to access the dashboard and saved project features. Password reset and optional verification are also available.',
+    'account': 'Use Register to create an account and Log in to access the dashboard and saved project features. No verification code is required.',
 }
 
 
@@ -226,19 +232,6 @@ def _has_azure_config():
 
 def _env_bool(name, default=False):
     return str(os.getenv(name, default)).strip().lower() in {'1', 'true', 'yes', 'on'}
-
-
-def verification_providers_configured():
-    configured_values = [
-        os.getenv('SMTP_HOST', ''),
-        os.getenv('SMTP_USERNAME', ''),
-        os.getenv('MAIL_USERNAME', ''),
-        os.getenv('TWILIO_ACCOUNT_SID', ''),
-        os.getenv('SENDGRID_API_KEY', ''),
-        os.getenv('FIREBASE_PROJECT_ID', ''),
-    ]
-    placeholder_values = {'', 'changeme', 'change-me', 'example', 'replace_me', 'replace-me', 'your_smtp_username', 'your_twilio_account_sid'}
-    return any((value or '').strip().lower() not in placeholder_values for value in configured_values)
 
 
 def send_email_message(to_email, subject, body):
@@ -1116,13 +1109,22 @@ class FileProjectStore:
         return sorted(normalized, key=lambda item: item.get('updated_at') or item.get('created_at') or datetime.min, reverse=True)
 
 
+def _mongo_uri_configured():
+    value = (os.getenv('MONGO_URI') or '').strip()
+    if not value:
+        return False
+    lowered = value.lower()
+    return not any(marker in lowered for marker in ('replace_with_', 'your-', 'example', '******'))
+
+
 def _mongo_available():
     try:
         if mongo is None or not hasattr(mongo, 'cx'):
             return False
         mongo.cx.admin.command('ping')
         return True
-    except Exception:
+    except Exception as exc:
+        logger.warning('MongoDB ping failed (%s).', type(exc).__name__)
         return False
 
 
@@ -1302,23 +1304,21 @@ class MongoUserStore:
 
 def get_user_store():
     if _mongo_available():
-        try:
-            users = db_collection('users')
-            if users is not None:
-                return MongoUserStore(users)
-        except Exception:
-            pass
+        users = db_collection('users')
+        if users is not None:
+            return MongoUserStore(users)
+    if os.getenv('VERCEL') == '1':
+        raise DatabaseUnavailableError('MongoDB is unavailable. Check the MONGO_URI environment variable in Vercel.')
     return FileUserStore(USER_STORE_PATH)
 
 
 def get_project_store():
     if _mongo_available():
-        try:
-            projects = db_collection('projects')
-            if projects is not None:
-                return projects
-        except Exception:
-            pass
+        projects = db_collection('projects')
+        if projects is not None:
+            return projects
+    if os.getenv('VERCEL') == '1':
+        raise DatabaseUnavailableError('MongoDB is unavailable. Check the MONGO_URI environment variable in Vercel.')
     return FileProjectStore(PROJECT_STORE_PATH)
 
 
@@ -1384,6 +1384,8 @@ def get_resource_repository(resource_type):
         collection = db_collection(resource_type)
         if collection is not None:
             return MongoResourceRepository(collection)
+    if os.getenv('VERCEL') == '1':
+        raise DatabaseUnavailableError('MongoDB is unavailable. Check the MONGO_URI environment variable in Vercel.')
     return FileResourceRepository(RESOURCE_STORE_PATH)
 
 
@@ -1732,8 +1734,8 @@ def register():
                         'phone': phone,
                         'password_hash': generate_password_hash(password),
                         'role': role,
-                        'email_verified': verification_providers_configured() is False,
-                        'mobile_verified': verification_providers_configured() is False,
+                        'email_verified': True,
+                        'mobile_verified': True,
                         'verification_codes': {},
                         'created_at': datetime.utcnow(),
                     })
@@ -1742,11 +1744,8 @@ def register():
                     if users.find_by_email(email):
                         flash('An account with that email already exists.', 'warning')
                         return render_template('auth.html', mode='register')
-                    created = users.create_user(name, email, generate_password_hash(password), phone=phone, email_verified=not verification_providers_configured(), mobile_verified=not verification_providers_configured(), role=role)
+                    created = users.create_user(name, email, generate_password_hash(password), phone=phone, email_verified=True, mobile_verified=True, role=role)
                     session['user_id'], session['user_name'], session['user_email'], session['user_role'] = str(created['_id']), created['name'], created['email'], created.get('role', 'user')
-                if verification_providers_configured():
-                    flash('Your account is created. Please verify your email or mobile number to continue.', 'success')
-                    return redirect(url_for('verify_account'))
                 flash('Account ready. You can continue to your dashboard.', 'success')
                 return redirect(url_for('dashboard'))
             except (PyMongoError, ValueError):
@@ -1768,9 +1767,6 @@ def login():
             if record and check_password_hash(record['password_hash'], password):
                 session['user_id'], session['user_name'], session['user_email'] = str(record.get('_id') or record.get('id')), record['name'], record.get('email') or email
                 session['user_role'] = _user_role_from_record(record)
-                if not (record.get('email_verified') or record.get('mobile_verified')) and verification_providers_configured():
-                    flash('Please verify your email or mobile number before logging in.', 'warning')
-                    return redirect(url_for('verify_account'))
                 if not (record.get('email_verified') or record.get('mobile_verified')):
                     if hasattr(users, 'update_one'):
                         users.update_one({'_id': record.get('_id') or record.get('id')}, {'$set': {'email_verified': True, 'mobile_verified': True}})
@@ -1835,56 +1831,9 @@ def reset_password(token):
 
 @app.route('/verify_account', methods=['GET', 'POST'])
 def verify_account():
-    user_email = session.get('user_email')
-    users = get_user_store()
-    record = None
-    if user_email:
-        if hasattr(users, 'find_one'):
-            record = users.find_one({'email': user_email})
-        else:
-            record = users.find_by_email(user_email)
-
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower() or user_email
-        method = request.form.get('method', 'email')
-        action = request.form.get('action', 'verify')
-        if not email:
-            flash('Enter your email address to verify your account.', 'danger')
-            return render_template('auth.html', mode='verify_account', user_email=user_email)
-
-        record = users.find_one({'email': email}) if hasattr(users, 'find_one') else users.find_by_email(email)
-        if not record:
-            flash('No account was found for that email.', 'warning')
-            return render_template('auth.html', mode='verify_account', user_email=email)
-
-        if action == 'send':
-            if hasattr(users, 'issue_verification_code'):
-                code = users.issue_verification_code(email, method)
-                if code:
-                    flash(f'A verification code for {method} has been generated: {code}.', 'success')
-                else:
-                    flash('Unable to generate a verification code.', 'danger')
-            else:
-                flash('Verification is not available for this account store.', 'warning')
-            return render_template('auth.html', mode='verify_account', user_email=email)
-
-        code = request.form.get('code', '').strip()
-        if hasattr(users, 'verify_verification_code'):
-            if users.verify_verification_code(email, method, code):
-                session['user_id'], session['user_name'], session['user_email'] = str(record.get('_id') or record.get('id')), record['name'], record.get('email')
-                flash(f'{method.title()} verified successfully.', 'success')
-                return redirect(request.args.get('next') or url_for('dashboard'))
-            flash('That verification code is invalid or expired.', 'danger')
-        else:
-            flash('Verification is not available for this account store.', 'warning')
-
-    if record and not (record.get('email_verified') or record.get('mobile_verified')):
-        if user_email:
-            session['user_email'] = user_email
-        return render_template('auth.html', mode='verify_account', user_email=user_email or record.get('email'))
-    if record:
+    if session.get('user_id'):
         return redirect(url_for('dashboard'))
-    return render_template('auth.html', mode='verify_account', user_email=user_email)
+    return redirect(url_for('login'))
 
 
 @app.route('/logout')
@@ -2638,6 +2587,12 @@ def health():
 @app.errorhandler(404)
 def not_found(error):
     return render_template('error.html', code=404, message='The page you requested could not be found.'), 404
+
+
+@app.errorhandler(DatabaseUnavailableError)
+def database_unavailable(error):
+    logger.error('%s', error)
+    return render_template('error.html', code=503, message=str(error)), 503
 
 
 @app.errorhandler(500)

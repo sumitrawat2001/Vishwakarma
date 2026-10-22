@@ -1,4 +1,5 @@
-body{font-size:16px;line-height:1.55;background:radial-gradient(circle at 90% 0%,#e2eee4 0,#f4f1e9 34rem);transition:background .25s ease,color .25s ease}
+html{font-size:20px}
+body{font-size:1rem;line-height:1.7;background:radial-gradient(circle at 90% 0%,#e2eee4 0,#f4f1e9 34rem);transition:background .25s ease,color .25s ease;-webkit-text-size-adjust:100%}
 body.dark-mode{background:radial-gradient(circle at 90% 0%,#172932 0,#121a1e 30rem);color:#edf7f1}.dark-mode .nav,.dark-mode .panel,.dark-mode .metric-card,.dark-mode .summary-tile,.dark-mode .dashboard-badge,.dark-mode .filter-pill,.dark-mode .mini-card,.dark-mode .feature-grid article,.dark-mode .button,.dark-mode .theme-toggle,.dark-mode .table-wrap,.dark-mode footer{background:#162329;border-color:#2d3d43;box-shadow:0 12px 28px rgba(0,0,0,.16);color:#edf7f1}.dark-mode .button{background:#ed6b42}.dark-mode .nav a,.dark-mode .panel a,.dark-mode .brand,.dark-mode h1,.dark-mode h2,.dark-mode h3,.dark-mode .summary-tile strong,.dark-mode .metric-card b,.dark-mode .dashboard-badge strong,.dark-mode .status-list li,.dark-mode .metric-label,.dark-mode .dashboard-badge span,.dark-mode .panel-header h2,.dark-mode .mini-card strong{color:#edf7f1}.dark-mode .muted,.dark-mode .metric-card p,.dark-mode .summary-tile span,.dark-mode .status-list li,.dark-mode .donut-center span,.dark-mode .mini-card p,.dark-mode .chart-labels{color:#b3c2bc}.dark-mode .progress-bar{background:#29373d}.dark-mode .theme-toggle{box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .dark-mode .donut-chart::before{background:#162329}.dark-mode .project-summary-grid .summary-tile{background:#1d2a30;border-color:#2a3a40}.dark-mode .panel,.dark-mode .metric-card,.dark-mode .summary-tile,.dark-mode .mini-card{box-shadow:0 12px 24px rgba(0,0,0,.12)}.dark-mode .mini-chart span{background:linear-gradient(180deg,#8ed9b1,#56b58b)}
 h1{font-size:clamp(4rem,9vw,8rem);line-height:.94;margin:28px 0 34px}
@@ -115,6 +116,36 @@ h3{font-size:1.35rem;line-height:1.25}
 .dark-mode .summary-tile{background:#17293a;border-color:#2b4358}
 .dark-mode .summary-tile span{color:#b0bfd0}
 .dark-mode .summary-tile strong{color:#edf7ff}
+main h1{font-size:clamp(2.9rem,5.8vw,4.9rem)}
+main .hero h1{font-size:clamp(2.8rem,5.8vw,4.9rem)}
+main .auth-intro h1{font-size:3.25rem}
+main .dashboard-header h1{font-size:2.4rem}
+main .planner-top h1{font-size:clamp(2.7rem,4.3vw,4.5rem)}
+h2{font-size:clamp(2.1rem,4.2vw,3.3rem)}
+main .hero-card-copy h2{font-size:2.05rem}
+main .panel-header h2{font-size:1.5rem}
+h3{font-size:1.5rem}
+.button,nav .nav-cta{font-size:1.08rem}
+main .button{min-height:56px;padding:17px 24px}
+nav .nav-cta{min-height:48px;padding:12px 18px}
+main .quick-grid .button{font-size:1rem;min-height:52px;padding:14px 16px}
+main .planner-actions .editor-button{font-size:1rem;padding:14px 19px}
+@media(max-width:700px){
+  main h1{font-size:2.9rem}
+  main .hero h1{font-size:2.75rem}
+  main .auth-intro h1{font-size:2.6rem}
+  main .dashboard-header h1{font-size:2.2rem}
+  main .planner-top h1{font-size:2.7rem}
+  h2{font-size:2.4rem}
+  main .hero-card-copy h2{font-size:1.8rem}
+  main .panel-header h2{font-size:1.5rem}
+  h3{font-size:1.45rem}
+  .button,.nav-cta{font-size:1rem}
+  main .button{min-height:54px;padding:15px 19px}
+  nav .nav-cta{min-height:44px;padding:11px 14px}
+  main .quick-grid .button{min-height:50px;padding:13px 15px}
+  main .planner-actions .editor-button{font-size:.98rem;padding:13px 16px}
+}
 @media(max-width:800px){.dashboard-shell .dashboard-side-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible}.dashboard-shell .dashboard-side-nav a{min-height:44px;white-space:normal;text-align:left}}
 @media(max-width:600px){.dashboard-shell .dashboard-side-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-shell .dashboard-side-nav a{padding:10px;font-size:.84rem;line-height:1.3}}
 @media(max-width:1050px){.dashboard-shell{grid-template-columns:210px minmax(0,1fr);gap:18px}.hero-dashboard-card{grid-template-columns:minmax(0,1fr) 230px;padding:22px}.dashboard-panels{grid-template-columns:1fr 1fr}}

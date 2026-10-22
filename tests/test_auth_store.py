@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from werkzeug.security import generate_password_hash
 
-from app import FileProjectStore, FileUserStore, SupportAgent, SupportConversationStore, SupportTicketStore, PROJECT_STORE_PATH, USER_STORE_PATH, app, mongo
+from app import DatabaseUnavailableError, FileProjectStore, FileUserStore, SupportAgent, SupportConversationStore, SupportTicketStore, PROJECT_STORE_PATH, USER_STORE_PATH, app, mongo
 
 
 class MongoConnectionTests(unittest.TestCase):
@@ -19,6 +19,31 @@ class MongoConnectionTests(unittest.TestCase):
             self.assertEqual(client.get('/login').status_code, 200)
 
         close_client.assert_not_called()
+
+    def test_vercel_entrypoint_uses_the_flask_application(self):
+        from api.index import app as vercel_app
+
+        self.assertIs(vercel_app, app)
+
+    def test_vercel_auth_routes_report_missing_mongodb_configuration(self):
+        client = app.test_client()
+        with patch.dict(os.environ, {'VERCEL': '1'}), patch('app._mongo_available', return_value=False):
+            register_response = client.post('/register', data={
+                'name': 'Vercel User',
+                'email': 'vercel@example.com',
+                'phone': '+911234567890',
+                'password': 'securepass123',
+                'confirm_password': 'securepass123',
+            })
+            login_response = client.post('/login', data={
+                'email': 'vercel@example.com',
+                'password': 'securepass123',
+            })
+
+        for response in (register_response, login_response):
+            with self.subTest(status=response.status_code):
+                self.assertEqual(response.status_code, 503)
+                self.assertIn(b'MONGO_URI', response.data)
 
 
 class FileUserStoreTests(unittest.TestCase):
@@ -57,16 +82,9 @@ class FileUserStoreTests(unittest.TestCase):
             self.assertTrue(store.verify_verification_code('amit@example.com', 'mobile', phone_code))
             self.assertTrue(store.find_by_email('amit@example.com')['mobile_verified'])
 
-    def test_login_allows_unverified_users_when_no_provider_is_configured(self):
+    def test_login_allows_unverified_users_even_when_providers_are_configured(self):
         client = app.test_client()
-        with patch.dict(os.environ, {
-            'SMTP_HOST': '',
-            'SMTP_USERNAME': '',
-            'MAIL_USERNAME': '',
-            'TWILIO_ACCOUNT_SID': '',
-            'SENDGRID_API_KEY': '',
-            'FIREBASE_PROJECT_ID': '',
-        }, clear=False):
+        with patch.dict(os.environ, {'SMTP_HOST': 'smtp.example.invalid'}):
             users = FileUserStore(USER_STORE_PATH)
             existing = users.find_by_email('guest@example.com')
             if existing:
@@ -370,17 +388,41 @@ class SupportAgentTests(unittest.TestCase):
                 self.assertTrue(store.verify_verification_code('amit@example.com', 'whatsapp', code))
                 self.assertTrue(store.find_by_email('amit@example.com')['mobile_verified'])
 
-    def test_verify_account_page_lists_whatsapp_option(self):
+    def test_register_does_not_require_or_send_an_otp(self):
         client = app.test_client()
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            users = FileUserStore(Path(tmp_dir) / 'users.json')
+            with patch('app.get_user_store', return_value=users), \
+                    patch.dict(os.environ, {'SMTP_HOST': 'smtp.example.invalid'}), \
+                    patch('app.send_email_message') as send_email, \
+                    patch('app.send_sms_message') as send_sms:
+                response = client.post('/register', data={
+                    'name': 'OTP-free User',
+                    'email': 'otp-free@example.com',
+                    'phone': '+911234567890',
+                    'password': 'securepass123',
+                    'confirm_password': 'securepass123',
+                })
+
+            self.assertEqual(response.status_code, 302)
+            self.assertIn('/dashboard', response.headers.get('Location', ''))
+            account = users.find_by_email('otp-free@example.com')
+            self.assertTrue(account['email_verified'])
+            self.assertTrue(account['mobile_verified'])
+            send_email.assert_not_called()
+            send_sms.assert_not_called()
+
+    def test_verify_account_link_redirects_without_requesting_a_code(self):
+        client = app.test_client()
+        response = client.get('/verify_account')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.headers.get('Location', ''))
+
         with client.session_transaction() as session:
             session['user_id'] = 'user-1'
-            session['user_name'] = 'Tester'
-            session['user_email'] = 'tester@example.com'
-
         response = client.get('/verify_account')
-        self.assertEqual(response.status_code, 200)
-        html = response.get_data(as_text=True)
-        self.assertIn('value="whatsapp"', html)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/dashboard', response.headers.get('Location', ''))
 
     def test_project_milestones_can_be_added(self):
         client = app.test_client()
