@@ -31,40 +31,7 @@
       <form id="material-form" class="simulation-form">
         <div class="form-grid two-col">
           <label>
-            Concrete Grade
-            <select name="concrete_grade">
-              <option value="M20">M20</option>
-              <option value="M25" selected>M25</option>
-              <option value="M30">M30</option>
-              <option value="M35">M35</option>
-            </select>
-          </label>
-          <label>
-            Cement Grade
-            <select name="cement_grade">
-              <option value="OPC 43">OPC 43</option>
-              <option value="OPC 53" selected>OPC 53</option>
-              <option value="PSC">PSC</option>
-            </select>
-          </label>
-          <label>
-            Steel Grade
-            <select name="steel_grade">
-              <option value="Fe415">Fe415</option>
-              <option value="Fe500" selected>Fe500</option>
-              <option value="Fe550">Fe550</option>
-            </select>
-          </label>
-          <label>
-            Brick Type
-            <select name="brick_type">
-              <option value="Traditional">Traditional</option>
-              <option value="Fly Ash" selected>Fly Ash</option>
-              <option value="AAC">AAC</option>
-            </select>
-          </label>
-          <label>
-            Built-up Area (sq ft)
+            Area per floor (sq ft)
             <input type="number" name="area" value="1200" min="1" step="1">
           </label>
           <label>
@@ -75,22 +42,17 @@
         <button type="submit" class="primary-button">Run Simulation</button>
       </form>
 
+      <div class="simulation-disclaimer material-estimate-notice">
+        Cement: rough estimate of 0.45 50 kg bags per sq ft per floor, rounded up. Other material units are unspecified; this is not an IS-code quantity takeoff. Concrete strength is not calculated.
+      </div>
       <div class="result-panel" id="material-results">
-        <div class="metric-card">
-          <span>Indicative Strength</span>
-          <strong id="material-strength">—</strong>
+        <div class="metric-card full-span">
+          <span>Estimated quantities (cement in 50 kg bags)</span>
+          <strong id="material-quantities">Run an estimate to see quantities.</strong>
         </div>
-        <div class="metric-card">
-          <span>Estimated Material Cost</span>
-          <strong id="material-cost">—</strong>
-        </div>
-        <div class="metric-card">
-          <span>Durability Indicator</span>
-          <strong id="material-durability">—</strong>
-        </div>
-        <div class="metric-card">
-          <span>Overall Result</span>
-          <strong id="material-result">—</strong>
+        <div class="metric-card full-span">
+          <span>Calculation basis</span>
+          <strong id="material-basis">Cement: area per floor × floors × 0.45 bags, rounded up to whole bags.</strong>
         </div>
       </div>
     </article>

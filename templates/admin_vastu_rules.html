@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Manage Vastu Rules | Vishwakarma{% endblock %}
+{% block content %}
+<section class="section admin-shell vastu-admin">
+  <div class="admin-header">
+    <div>
+      <p class="eyebrow">SYSTEM CONTROL · TRADITIONAL GUIDELINES</p>
+      <h1>Manage Vastu rules</h1>
+      <p class="vastu-help">These rules are shared by all users in Standard mode. Keep recommendations optional, explain your references, and never describe them as scientific or safety advice.</p>
+    </div>
+    <a class="button secondary" href="{{ url_for('admin_dashboard') }}">Back to admin</a>
+  </div>
+
+  <section class="vastu-card">
+    <div class="vastu-card-heading">
+      <div><p class="eyebrow">SHARED RULE SET</p><h2 data-admin-form-title>Add a rule</h2></div>
+      <button class="button secondary" type="button" data-admin-rule-reset>New rule</button>
+    </div>
+    <p class="vastu-management-status" data-admin-rule-status role="status" aria-live="polite"></p>
+    <form class="vastu-rule-form" data-admin-rule-form>
+      <input type="hidden" name="id">
+      <label>Rule name
+        <input name="rule_name" maxlength="100" required>
+      </label>
+      <label>Room or feature
+        <select name="component" required>
+          {% for key, label in component_options.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Preferred direction
+        <select name="preferred_direction" required>
+          {% for direction in directions %}<option value="{{ direction }}">{{ direction }} · {{ direction_labels[direction] }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Importance
+        <select name="priority">
+          <option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option>
+        </select>
+      </label>
+      <label>Recommendation
+        <textarea name="recommendation" rows="2" maxlength="1000" placeholder="Optional, practical suggestion"></textarea>
+      </label>
+      <label>Reference/source (unverified)
+        <input name="source" maxlength="200" placeholder="Source or note">
+      </label>
+      <label>Description
+        <textarea name="description" rows="2" maxlength="1000"></textarea>
+      </label>
+      <label>Applicable conditions
+        <textarea name="applicable_conditions" rows="2" maxlength="1000"></textarea>
+      </label>
+      <label>If relocation is not practical
+        <textarea name="alternative_if_relocation_not_possible" rows="2" maxlength="1000"></textarea>
+      </label>
+      <fieldset>
+        <legend>Alternative directions</legend>
+        <div class="vastu-alternative-options">
+          {% for direction in directions %}
+          <label><input type="checkbox" name="alternative_directions" value="{{ direction }}"> {{ direction }} · {{ direction_labels[direction] }}</label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <label class="vastu-rule-enabled"><input type="checkbox" name="enabled" checked> Enabled</label>
+      <div class="vastu-rule-form-actions">
+        <button class="button primary" type="submit">Save rule</button>
+        <button class="button secondary" type="button" data-admin-rule-reset>Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="vastu-card vastu-custom-rules">
+    <div class="vastu-card-heading">
+      <div><p class="eyebrow">ACTIVE AND DISABLED</p><h2>Configured rules</h2></div>
+      <span class="vastu-step">{{ rules|length }} total</span>
+    </div>
+    <div class="vastu-custom-rules-list" data-admin-rule-list>
+      {% for rule in rules %}
+      <article class="vastu-custom-rule" data-rule-id="{{ rule.id }}">
+        <div>
+          <strong>{{ rule.rule_name }}</strong>
+          <span>{{ component_options.get(rule.component, rule.component) }} · {{ rule.preferred_direction }} · {{ rule.priority|title }} importance</span>
+        </div>
+        <p>{{ rule.recommendation or rule.description or 'No recommendation provided.' }}</p>
+        <small>{{ 'Enabled' if rule.enabled else 'Disabled' }} · {{ rule.source }}</small>
+        <div class="vastu-rule-actions">
+          <button type="button" data-admin-rule-edit="{{ rule.id }}">Edit</button>
+          <button type="button" data-admin-rule-toggle="{{ rule.id }}" data-enabled="{{ 'true' if rule.enabled else 'false' }}">{{ 'Disable' if rule.enabled else 'Enable' }}</button>
+          <button type="button" data-admin-rule-delete="{{ rule.id }}">Delete</button>
+        </div>
+      </article>
+      {% else %}
+      <p class="vastu-empty-state">No Vastu rules are configured.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <script id="admin-vastu-rules" type="application/json">{{ rules|tojson }}</script>
+</section>
+<script src="{{ url_for('static', filename='js/admin-vastu-rules.js') }}"></script>
+{% endblock %}

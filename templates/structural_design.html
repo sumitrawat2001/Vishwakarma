@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block title %}Structural Design Studio | VISHWAKARMA{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/structural-design.css') }}">
+<section class="structural-studio"
+  id="structural-studio"
+  data-project-id="{{ project.id if project else '' }}"
+  data-project-unit="{{ project.unit if project else 'ft' }}"
+  data-plot-length="{{ project.plot_length if project else 30 }}"
+  data-plot-width="{{ project.plot_width if project else 40 }}"
+  data-floors="{{ project.floors if project else 1 }}"
+  data-project-name="{{ project.name if project else '' }}"
+  data-initial-design="{{ active_design.design_data|tojson|forceescape if active_design else '{}' }}"
+  data-initial-rates="{{ active_design.rates|tojson|forceescape if active_design else '{}' }}"
+  data-design-id="{{ active_design.id if active_design else '' }}"
+  data-pdf-template="{{ url_for('structural_design_drawing_pdf', design_id='DESIGN_ID') }}">
+  <header class="studio-header">
+    <div>
+      <p class="studio-eyebrow">VISHWAKARMA / ENGINEERING WORKSPACE</p>
+      <h1>Structural Design <em>Studio</em></h1>
+      <p>Coordinate preliminary structural geometry with your saved House Planner project.</p>
+    </div>
+    <div class="studio-project">
+      <label for="structural-project">Active project</label>
+      {% if projects %}
+      <select id="structural-project">
+        {% for item in projects %}
+        <option value="{{ item.id }}" {% if project and item.id == project.id %}selected{% endif %}>
+          {{ item.name }} · {{ item.plot_length }} × {{ item.plot_width }} {{ item.unit }}
+        </option>
+        {% endfor %}
+      </select>
+      <a href="{{ url_for('planner', project_id=project.id) if project else url_for('planner') }}">Open House Planner ↗</a>
+      {% else %}
+      <p class="studio-empty-project">Create and save a layout first to reuse its plot and room data.</p>
+      <a class="studio-primary-link" href="{{ url_for('planner') }}">Open House Planner →</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="studio-safety" role="note">
+    <strong>Preliminary / educational only</strong>
+    <span>Generated geometry and quantities are not structural design or code-compliance checks. No dead, live, wind, seismic, or geotechnical load analysis is performed. An appropriately licensed structural engineer must verify all loads, soil data, detailing, and applicable Indian Standards before construction.</span>
+  </div>
+
+  {% if project %}
+  <div class="studio-layout" data-studio-enabled>
+    <aside class="studio-sidebar">
+      <div class="studio-sidebar-title"><span>DESIGN MODULES</span><small>01 — 09</small></div>
+      <nav class="studio-modules" aria-label="Structural design sections">
+        <button type="button" class="studio-module is-active" data-module="foundation"><span>01</span> Foundation</button>
+        <button type="button" class="studio-module" data-module="plinth"><span>02</span> Plinth design</button>
+        <button type="button" class="studio-module" data-module="column"><span>03</span> Column design</button>
+        <button type="button" class="studio-module" data-module="beam"><span>04</span> Beam design</button>
+        <button type="button" class="studio-module" data-module="slab"><span>05</span> Slab design</button>
+        <button type="button" class="studio-module" data-module="wall"><span>06</span> Wall & masonry</button>
+        <button type="button" class="studio-module" data-module="staircase"><span>07</span> Staircase design</button>
+        <button type="button" class="studio-module" data-module="reinforcement"><span>08</span> Reinforcement</button>
+        <button type="button" class="studio-module" data-module="simulation"><span>09</span> 3D simulation</button>
+      </nav>
+      <div class="studio-sidebar-note">
+        <strong>Planner data linked</strong>
+        <span>{{ project.floors }} floor(s) · {{ project.rooms|length }} room types · {{ project.unit }}</span>
+      </div>
+      <script type="application/json" id="planner-structural-context">{{ {
+        'rooms': project.rooms,
+        'room_dimensions': project.room_dimensions,
+        'layout_data': project.layout_data
+      }|tojson }}</script>
+      <div class="studio-save-controls">
+        <label for="design-name">Design set</label>
+        <input id="design-name" maxlength="100" value="{{ active_design.name if active_design else (project.name ~ ' structural design') }}" aria-label="Design set name">
+        <button type="button" id="save-structural-design" class="studio-button primary">Save design</button>
+        {% if active_design %}
+        <a id="download-structural-pdf" class="studio-button secondary" href="{{ url_for('structural_design_drawing_pdf', design_id=active_design.id) }}">Download drawing PDF</a>
+        {% else %}
+        <a id="download-structural-pdf" class="studio-button secondary" href="#" hidden>Download drawing PDF</a>
+        {% endif %}
+        <label for="saved-design-select">Saved designs</label>
+        <select id="saved-design-select">
+          {% for item in designs %}
+          <option value="{{ item.id }}" {% if active_design and item.id == active_design.id %}selected{% endif %}>{{ item.name }}</option>
+          {% endfor %}
+          {% if not designs %}<option value="">No saved design yet</option>{% endif %}
+        </select>
+        <button type="button" id="load-structural-design" class="studio-button quiet" {% if not designs %}disabled{% endif %}>Load selected design</button>
+        <p id="studio-message" role="status" aria-live="polite"></p>
+      </div>
+    </aside>
+
+    <main class="studio-main">
+      <div class="studio-toolbar">
+        <div><span class="studio-live-dot"></span><strong id="active-module-label">Foundation design</strong><small id="studio-unit-note">Dimensions in {{ project.unit }}</small></div>
+        <div class="studio-toolbar-actions">
+          <button type="button" class="studio-view is-active" data-view="top">Top view</button>
+          <button type="button" class="studio-view" data-view="section">Section</button>
+          <button type="button" class="studio-view" data-view="front">Front view</button>
+          <button type="button" class="studio-view" data-view="reinforcement">Rebar</button>
+          <button type="button" id="download-svg" class="studio-view">SVG</button>
+          <button type="button" id="download-png" class="studio-view">PNG</button>
+        </div>
+      </div>
+
+      <div class="studio-canvas-grid">
+        <section class="studio-drawing-board" aria-label="Technical drawing workspace">
+          <div class="drawing-board-heading"><span>DRAWING WORKSPACE</span><span id="drawing-view-caption">TOP / PLAN</span></div>
+          <svg id="structural-drawing" viewBox="0 0 760 460" role="img" aria-label="Dimensioned structural plan"></svg>
+          <div class="drawing-legend"><span><i class="legend-concrete"></i> Concrete</span><span><i class="legend-column"></i> Column / wall</span><span><i class="legend-steel"></i> Reinforcement (schematic)</span><span>Not for construction</span></div>
+        </section>
+
+        <aside class="studio-properties" aria-label="Design dimensions and properties">
+          <div class="properties-heading"><span>PROPERTIES</span><button type="button" id="reset-properties">Reset</button></div>
+          <p id="property-description">Dimensions inherited from the active saved House Planner project where possible.</p>
+          <form id="structural-properties" novalidate></form>
+          <div class="property-summary" id="property-summary"></div>
+        </aside>
+      </div>
+
+      <section class="studio-technical-panel">
+        <div class="technical-panel-heading">
+          <div><span>CONSTRUCTION SEQUENCE</span><h2>3D construction simulation</h2></div>
+          <div class="simulation-controls">
+            <button type="button" id="simulation-play" class="studio-button primary">Play stages</button>
+            <button type="button" id="simulation-reset" class="studio-button quiet">Reset view</button>
+          </div>
+        </div>
+        <div class="simulation-stage-row" id="simulation-stage-row" aria-label="Construction stage">
+          <button type="button" class="simulation-stage is-active" data-stage="0">Excavation</button>
+          <button type="button" class="simulation-stage" data-stage="1">PCC</button>
+          <button type="button" class="simulation-stage" data-stage="2">Footing</button>
+          <button type="button" class="simulation-stage" data-stage="3">Foundation columns</button>
+          <button type="button" class="simulation-stage" data-stage="4">Plinth beam</button>
+          <button type="button" class="simulation-stage" data-stage="5">Brickwork</button>
+          <button type="button" class="simulation-stage" data-stage="6">Columns</button>
+          <button type="button" class="simulation-stage" data-stage="7">Beams</button>
+          <button type="button" class="simulation-stage" data-stage="8">Slab</button>
+          <button type="button" class="simulation-stage" data-stage="9">Roofing</button>
+          <button type="button" class="simulation-stage" data-stage="10">Finishing</button>
+        </div>
+        <div class="simulation-layout">
+          <div id="structural-3d" class="structural-3d" role="region" aria-label="Interactive structural construction model" tabindex="0">
+            <div class="model-hint">Drag to rotate · Scroll to zoom</div>
+            <p id="three-fallback" hidden>3D preview unavailable. The dimensioned 2D drawing remains available.</p>
+          </div>
+          <div class="simulation-properties">
+            <strong>Visible elements</strong>
+            <label><input type="checkbox" data-element="excavation" checked> Excavation</label>
+            <label><input type="checkbox" data-element="pcc" checked> PCC layer</label>
+            <label><input type="checkbox" data-element="footing" checked> Footings</label>
+            <label><input type="checkbox" data-element="columns" checked> Columns</label>
+            <label><input type="checkbox" data-element="beams" checked> Beams</label>
+            <label><input type="checkbox" data-element="slab" checked> Slabs / roof</label>
+            <label><input type="checkbox" data-element="walls" checked> Masonry</label>
+            <span id="simulation-stage-label">Stage 1 / 11 · Excavation</span>
+          </div>
+        </div>
+        <p class="model-disclaimer">Illustrative framing generated from plot dimensions and user-entered counts. Column positions and construction sequence are schematic; this model does not verify architectural coordination or structural safety.</p>
+      </section>
+
+      <section class="studio-quantity-panel">
+        <div class="technical-panel-heading">
+          <div><span>MATERIAL ESTIMATION</span><h2>Geometry-based preliminary takeoff</h2></div>
+          <button type="button" id="calculate-structural-estimate" class="studio-button primary">Calculate materials & costs</button>
+        </div>
+        <p>Uses the project's saved plot/floor data and the dimensions above. Material rates come from the existing sourced-rate estimator; unset rates are not guessed. Use the per-stage breakdown and formulas to check the basis.</p>
+        <details class="estimator-rate-settings">
+          <summary>Optional local rates for excavation, shuttering and labour</summary>
+          <div class="rate-inputs">
+            <label>Material rate location state<input id="pricing-state" value="Uttarakhand" maxlength="80"></label>
+            <label>District / city<input id="pricing-district" maxlength="100" placeholder="Optional; no default district"></label>
+            <label>Excavation rate (INR / m³)<input type="number" min="0" step="0.01" data-rate="excavation"></label>
+            <label>Shuttering rate (INR / m²)<input type="number" min="0" step="0.01" data-rate="shuttering"></label>
+            <label>Labour days<input type="number" min="0" step="0.1" data-rate="labour_days"></label>
+            <label>Labour rate (INR / day)<input type="number" min="0" step="0.01" data-rate="labour_rate"></label>
+            <label>Material wastage (%)<input type="number" min="0" max="100" step="0.1" value="5" data-rate="wastage"></label>
+            <label>Cement rate (INR / bag)<input type="number" min="0" step="0.01" data-manual-rate="cement_per_bag" placeholder="Use sourced rate"></label>
+            <label>Sand rate (INR / CFT)<input type="number" min="0" step="0.01" data-manual-rate="sand_per_cft" placeholder="Use sourced rate"></label>
+            <label>Aggregate rate (INR / CFT)<input type="number" min="0" step="0.01" data-manual-rate="aggregate_per_cft" placeholder="Use sourced rate"></label>
+            <label>Steel rate (INR / kg)<input type="number" min="0" step="0.01" data-manual-rate="steel_per_kg" placeholder="Use sourced rate"></label>
+            <label>Brick rate (INR / piece)<input type="number" min="0" step="0.01" data-manual-rate="bricks_per_piece" placeholder="Use sourced rate"></label>
+          </div>
+          <p>Blank material prices use the app's saved, sourced rates. A manual override applies to this estimate only. State defaults to Uttarakhand; update it to match the project.</p>
+        </details>
+        <div id="structural-estimate-results" class="structural-estimate-results" aria-live="polite">
+          <p class="estimate-placeholder">Enter or review dimensions, then calculate to see quantities, formulas, and available priced costs.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  {% else %}
+  <section class="studio-no-project">
+    <h2>Start with your saved House Planner layout</h2>
+    <p>Structural Design Studio connects to an existing project so plot dimensions, floors, room dimensions and placements can be reused instead of re-entered.</p>
+    <a class="studio-button primary" href="{{ url_for('planner') }}">Create a house plan →</a>
+    <a href="{{ url_for('projects') }}">Browse saved projects</a>
+  </section>
+  {% endif %}
+</section>
+<script src="{{ url_for('static', filename='js/structural-design.js') }}"></script>
+{% endblock %}

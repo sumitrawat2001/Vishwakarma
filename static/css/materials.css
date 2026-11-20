@@ -1,0 +1,13 @@
+.materials-page{max-width:1180px;margin:0 auto}
+.materials-lead{max-width:760px;margin:-10px 0 28px;color:var(--muted);font-size:1.04rem;line-height:1.6}
+.materials-basis{margin:24px 0 18px;padding:20px 22px;border:1px solid rgba(47,111,229,.22);border-left:4px solid var(--orange);border-radius:16px;background:var(--card);box-shadow:0 10px 26px var(--shadow)}
+.materials-basis strong{font-family:'Space Grotesk',sans-serif;font-size:1.05rem}
+.materials-basis p{margin:8px 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
+.materials-page .table-wrap{overflow-x:auto;margin:20px 0}
+.materials-page table{width:100%;border-collapse:collapse;min-width:620px}
+.materials-page th,.materials-page td{padding:13px 15px;border-bottom:1px solid var(--line);text-align:left}
+.materials-page th{color:var(--muted);font-size:.75rem;letter-spacing:.07em;text-transform:uppercase}
+.materials-page td{font-size:.9rem}
+.materials-page .muted{max-width:850px;color:var(--muted);font-size:.84rem;line-height:1.6}
+body.dark-mode .materials-basis{background:var(--card)}
+@media(max-width:700px){.materials-page .inline-form{display:grid;grid-template-columns:1fr}.materials-page .inline-form label,.materials-page .inline-form button{width:100%}.materials-basis{padding:16px}}

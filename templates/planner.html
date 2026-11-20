@@ -1,53 +1,25 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% block title %}House Planner{% endblock %}
 {% block content %}
-<div class="planner-app">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/planner.css') }}">
+<div class="planner-app" data-planner-enhanced>
   <header class="planner-top">
     <div>
-      <p class="eyebrow">SMART HOUSE / FLOOR PLAN STUDIO</p>
-      <h1>Design your <em>space.</em></h1>
+      <p class="eyebrow">VISHWAKARMA / HOUSE PLANNER</p>
+      <h1>Shape a home around <em>your plan.</em></h1>
+      <p class="planner-lead">Set plot and room sizes, arrange spaces, then explore the same saved layout in 2D and 3D.</p>
     </div>
     <div class="planner-actions">
-      <button class="editor-button" id="reset-layout" type="button">Reset</button>
-      <button class="editor-button filled" type="submit" form="planner-form">Save plan <span>→</span></button>
+      <button class="editor-button" id="reset-layout" type="button" aria-label="Remove all rooms from the plan">Reset layout</button>
+      <button class="editor-button filled" type="submit" form="planner-form">Save plan <span aria-hidden="true">→</span></button>
     </div>
   </header>
 
-  <div class="planner-visual-grid" aria-label="Project inspiration gallery">
-    <article class="visual-card visual-feature">
-      <div class="visual-overlay">
-        <span class="visual-badge">Architectural design</span>
-        <h2>Minimal luxury. Thoughtful planning.</h2>
-      </div>
-    </article>
-
-    <div class="visual-stack">
-      <article class="visual-card small-card card-one">
-        <div class="visual-overlay">
-          <span>Quiet luxury</span>
-        </div>
-      </article>
-      <article class="visual-card small-card card-two">
-        <div class="visual-overlay">
-          <span>Design clarity</span>
-        </div>
-      </article>
-    </div>
-  </div>
-
-  <div class="planner-luxury-bar" aria-label="Property highlight summary">
-    <div class="stat-card">
-      <span class="stat-label">Residence</span>
-      <strong>Contemporary villa</strong>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Concept</span>
-      <strong>Open & airy</strong>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Finish</span>
-      <strong>Refined minimal</strong>
-    </div>
+  <div class="planner-summary" aria-label="Current plan summary">
+    <div><span>Project</span><strong id="planner-summary-name">{{ project.project_name if project else 'New plan' }}</strong></div>
+    <div><span>Plot</span><strong id="planner-summary-plot">{{ project.plot_width if project else (result.width if result else 40) }} × {{ project.plot_length if project else (result.length if result else 30) }} {{ project.unit if project else (result.unit if result else 'ft') }}</strong></div>
+    <div><span>Floors</span><strong id="planner-summary-floors">{{ project.floors if project else (result.floors if result else 1) }}</strong></div>
+    <div><span>Placed rooms</span><strong id="planner-summary-rooms" aria-live="polite">0</strong></div>
   </div>
 
   <form id="planner-form" method="post">
@@ -55,7 +27,7 @@
     <div class="planner-workspace">
       <aside class="planner-sidebar">
         <div class="side-heading"><strong>Build</strong><span>ROOMS</span></div>
-        <p class="side-note">Add rooms to your canvas and adjust quantities for a simple preliminary plan.</p>
+        <p class="side-note">Use + to add a room or − to remove the last one added. Drag doors, windows, vents, or furniture in the 2D plan.</p>
 
         {% if project %}
         <div class="project-banner">
@@ -65,13 +37,35 @@
 
         <div class="room-palette">
           {% for room in rooms %}
-          <button type="button" class="room-tool" data-room="{{ room }}">
-            <span class="room-icon">+</span>
-            <span>{{ room }}</span>
-            <b>{% if project and project.rooms and project.rooms.get(room) %}{{ project.rooms.get(room) }}{% else %}+{% endif %}</b>
-          </button>
+            <div class="room-tool-row">
+              <button type="button" class="room-tool" data-room="{{ room }}" aria-label="Add {{ room }} room">
+                <span class="room-icon">+</span>
+                <span>{{ room }}</span>
+                <b>{% if project and project.rooms and project.rooms.get(room) %}{{ project.rooms.get(room) }}{% else %}+{% endif %}</b>
+              </button>
+              <button type="button" class="room-remove-tool" data-room="{{ room }}" aria-label="Remove one {{ room }} room" title="Remove the last added {{ room }} room" {% if not project or not project.rooms or not project.rooms.get(room) %}disabled{% endif %}>−</button>
+            </div>
           {% endfor %}
         </div>
+
+        <section class="opening-tools" aria-label="Add doors and openings">
+          <strong>Doors & openings</strong>
+          <label for="opening-room-select">Target room
+            <select id="opening-room-select">
+              <option value="">Add a room first</option>
+            </select>
+          </label>
+          <label for="opening-room-instance">Room number
+            <input id="opening-room-instance" type="number" min="1" value="1" disabled>
+          </label>
+          <div class="opening-tool-buttons">
+            <button type="button" data-opening-kind="door" disabled>Add door</button>
+            <button type="button" data-opening-kind="window" disabled>Add window</button>
+            <button type="button" data-opening-kind="ventilator" disabled>Add ventilator</button>
+            <button type="button" data-opening-kind="skylight" disabled>Add skylight</button>
+          </div>
+          <p>After adding, drag an opening in either 2D or 3D, or select it to edit its dimensions. Plans support up to 500 saved items.</p>
+        </section>
 
         <div class="side-control">
           <label>Floors
@@ -115,6 +109,9 @@
             <label>Depth
               <input class="room-dim-input" type="number" min="4" step="0.1" value="{{ room_depth }}" data-room="{{ room }}" data-dimension="depth" name="room_depth_{{ room }}">
             </label>
+            <label>{% if room == 'Parking' %}Canopy height{% else %}Wall height{% endif %}
+              <input class="room-dim-input" type="number" min="4" step="0.1" value="{{ room_dims.height if room_dims and room_dims.height is defined else 9 }}" data-room="{{ room }}" data-dimension="height" name="room_height_{{ room }}">
+            </label>
             <input type="hidden" id="form-room-{{ room | replace(' ', '-') | replace('/', '-') | replace('.', '') }}" name="room_{{ room }}" value="{{ room_count }}">
           </div>
           {% endfor %}
@@ -123,31 +120,60 @@
 
       <section class="canvas-panel">
         <div class="canvas-toolbar">
-          <span><i class="status-dot"></i> <span id="view-mode-label">2D plan view</span></span>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <button type="button" id="view-toggle" class="mini-toggle">3D View</button>
-            <button type="button" id="roof-toggle" class="mini-toggle">Roof: On</button>
-            <button type="button" id="walls-only-toggle" class="mini-toggle">Walls only: Off</button>
+          <span class="planner-view-status"><i class="status-dot"></i> <span id="view-mode-label" aria-live="polite">2D plan</span></span>
+          <div class="planner-toolbar-controls" role="group" aria-label="Plan view controls">
+            <div class="planner-view-switch" role="group" aria-label="View mode">
+              <button type="button" id="view-2d" class="mini-toggle is-active" aria-pressed="true">2D Plan</button>
+              <button type="button" id="view-toggle" class="mini-toggle" aria-pressed="false">3D Preview</button>
+            </div>
+            <button type="button" id="roof-toggle" class="mini-toggle" aria-pressed="true">Roof on</button>
+            <button type="button" id="cutaway-toggle" class="mini-toggle" aria-pressed="false">Cutaway off</button>
+            <button type="button" id="walls-only-toggle" class="mini-toggle" aria-pressed="false">Furniture on</button>
             <label class="mini-toggle mini-select">
-              <span>Style</span>
-              <select id="furniture-style">
-                <option value="minimal">Minimal</option>
-                <option value="standard" selected>Standard</option>
-                <option value="luxury">Luxury</option>
+              <span>Furniture</span>
+              <select id="furniture-style" aria-label="Furniture detail">
+                <option value="minimal">Essentials</option>
+                <option value="standard" selected>Comfort</option>
+                <option value="luxury">Full set</option>
+              </select>
+            </label>
+            <label class="mini-toggle mini-select">
+              <span>Finish</span>
+              <select id="planner-finish" aria-label="Surface finish">
+                <option value="oak" selected>Warm oak</option>
+                <option value="stone">Pale stone</option>
+                <option value="slate">Slate tile</option>
+              </select>
+            </label>
+            <label class="mini-toggle mini-select">
+              <span>Light</span>
+              <select id="planner-lighting" aria-label="Lighting mode">
+                <option value="daylight" selected>Daylight</option>
+                <option value="interior">Interior</option>
+              </select>
+            </label>
+            <label class="mini-toggle mini-select">
+              <span>Camera</span>
+              <select id="camera-view" aria-label="3D camera angle">
+                <option value="isometric" selected>Isometric</option>
+                <option value="top">Top</option>
+                <option value="front">Front</option>
+                <option value="side">Side</option>
               </select>
             </label>
             <label class="mini-toggle mini-select">
               <span>Floor</span>
-              <select id="floor-level">
-                <option value="all" selected>All</option>
-                <option value="ground">Ground</option>
-                <option value="first">First</option>
+              <select id="floor-level" aria-label="Visible floor">
+                <option value="all" selected>All floors</option>
               </select>
             </label>
-            <button type="button" id="grid-toggle" class="mini-toggle">Grid</button>
-            <button type="button" id="zoom-out" class="mini-toggle">−</button>
-            <span id="zoom-level">100%</span>
-            <button type="button" id="zoom-in" class="mini-toggle">+</button>
+            <button type="button" id="grid-toggle" class="mini-toggle" aria-pressed="true">Grid on</button>
+            <div class="planner-zoom-controls" role="group" aria-label="2D plan zoom">
+              <button type="button" id="zoom-out" class="mini-toggle" aria-label="Zoom out">−</button>
+              <span id="zoom-level" aria-live="polite">100%</span>
+              <button type="button" id="zoom-in" class="mini-toggle" aria-label="Zoom in">+</button>
+            </div>
+            <button type="button" id="camera-reset" class="mini-toggle" aria-label="Reset 3D camera">Reset camera</button>
           </div>
         </div>
 
@@ -157,12 +183,33 @@
           <div class="summary-pill"><span>Open Area</span><strong id="open-area">360 sq ft</strong></div>
         </div>
 
+        <div id="planner-alert" class="planner-alert" role="status" aria-live="polite" hidden></div>
+        <div id="architectural-inspector" class="architectural-inspector" hidden>
+          <strong id="architectural-item-name">Select an architectural item</strong>
+          <span id="architectural-item-room"></span>
+          <div class="architectural-dimensions">
+            <label>Width <input id="architectural-width" type="number" min="0.1" step="0.1"></label>
+            <label>Depth <input id="architectural-depth" type="number" min="0.1" step="0.1"></label>
+            <label>Height <input id="architectural-height" type="number" min="0.1" step="0.1"></label>
+          </div>
+          <p>Drag a door, window, ventilator, or skylight in 2D or 3D to position it. Edit its width, depth, and height here; these are indicative planning dimensions.</p>
+        </div>
         <div id="floor-plan" class="floor-plan-wrap">
           <div class="plan-grid"></div>
-          <svg id="room-layer" viewBox="0 0 720 500" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="planner-compass" data-north-direction="{{ project.vastu_settings.north_direction if project and project.vastu_settings else 'N' }}" aria-label="Plan compass">
+            <span data-plan-side="0">N</span><span data-plan-side="1">NE</span><span data-plan-side="2">E</span><span data-plan-side="3">SE</span>
+            <span data-plan-side="4">S</span><span data-plan-side="5">SW</span><span data-plan-side="6">W</span><span data-plan-side="7">NW</span>
+          </div>
+          <svg id="room-layer" viewBox="0 0 720 500" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Draggable 2D floor plan. Use plus and minus room controls to add or remove rooms."></svg>
         </div>
 
-        <div id="3d-canvas" class="canvas-3d" style="display:none"></div>
+        <div id="3d-canvas" class="canvas-3d" role="region" aria-label="Interactive 3D house preview" tabindex="0" hidden>
+          <div class="planner-3d-compass" aria-label="North direction">
+            <span class="planner-north-arrow" aria-hidden="true">↑</span><span>North</span>
+          </div>
+          <div id="planner-3d-status" class="planner-3d-status" role="status" aria-live="polite" hidden></div>
+        </div>
+        <p class="planner-canvas-hint" id="planner-canvas-hint">Select an item to edit its dimensions; drag it to reposition. Room, plot, and object measurements use the selected unit.</p>
       </section>
     </div>
 
@@ -172,7 +219,10 @@
       <input type="hidden" id="form-plot-width" name="form_plot_width" value="40">
       <input type="hidden" id="form-unit" name="form_unit" value="ft">
       <input type="hidden" id="form-floors" name="form_floors" value="1">
+      <input type="hidden" id="layout-data" name="layout_data" value="{{ project.layout_data | tojson if project and project.layout_data else '{}' }}">
+      <input type="hidden" id="architectural-elements-data" name="architectural_elements" value="{{ project.architectural_elements | tojson if project and project.architectural_elements else (result.architectural_elements | tojson if result and result.architectural_elements else '[]') }}">
     </div>
   </form>
 </div>
+<script src="{{ url_for('static', filename='js/planner.js') }}"></script>
 {% endblock %}

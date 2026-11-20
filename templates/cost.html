@@ -1,1 +1,173 @@
-{% extends 'base.html' %}{% block title %}Cost Calculator{% endblock %}{% block content %}<section class="section cost-page"><div class="cost-intro"><div><p class="eyebrow">03 / COST PLANNING</p><h1>Build the<br><em>budget.</em></h1></div><p class="cost-lede">Enter your working costs and get a transparent planning figure with a small reserve for changes.</p></div><form class="tool-form cost-form" method="post"><div class="cost-form-heading"><div><p class="eyebrow">PROJECT INPUTS</p><h2>Cost breakdown</h2></div><span class="cost-chip">INR · indicative</span></div><div class="form-grid cost-input-grid">{% for category in categories %}<label class="cost-input">{{ category }}<span class="input-prefix">₹<input type="number" min="0" step="100" name="cost_{{ category }}" value="{{ values.get(category, '') }}" placeholder="0" inputmode="decimal"></span></label>{% endfor %}</div><div class="cost-form-footer"><p class="muted">Leave a category at ₹0 if it is not part of this phase.</p><button class="button primary" type="submit">Calculate estimate <span aria-hidden="true">→</span></button></div></form><div class="results cost-results"><div class="results-heading"><div><p class="eyebrow">ESTIMATE SUMMARY</p><h2>Your working total</h2></div><span class="formula-note">Subtotal + 5% contingency</span></div><div class="result-grid"><div class="result-card"><strong>₹{{ '%.0f'|format(subtotal) }}</strong><span>Subtotal</span></div><div class="result-card"><strong>₹{{ '%.0f'|format(contingency) }}</strong><span>Contingency reserve</span></div><div class="result-card result-card-total"><strong>₹{{ '%.0f'|format(total) }}</strong><span>Estimated total</span></div></div><button class="button secondary" type="button" data-resource-save data-resource="expenses" data-resource-payload='{{ {"description": "Construction cost estimate", "category": "budget", "amount": total}|tojson }}'>Save as expense</button></div><p class="muted cost-disclaimer">Rates are user supplied. This is an indicative planning estimate, not a quotation or a professional construction cost certificate.</p></section><script src="{{ url_for('static', filename='js/resource-api.js') }}"></script>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Material Estimation{% endblock %}
+{% block content %}
+<section class="section cost-page construction-estimator-page">
+  <header class="construction-estimator-hero">
+    <div>
+      <p class="eyebrow">VISHWAKARMA ESTIMATOR</p>
+      <h1>House Construction<br><em>Cost Calculator</em></h1>
+      <p>Instant estimate ke liye location, area aur construction quality select karein.</p>
+    </div>
+  </header>
+
+  <form class="construction-estimator-card" method="post" id="construction-estimator-form" data-city-data-url="{{ url_for('static', filename='data/india-cities.json') }}">
+    <input type="hidden" name="estimate_type" value="simple">
+    {% if simple_error %}<p class="simple-estimate-error" role="alert">{{ simple_error }}</p>{% endif %}
+
+    <section class="construction-estimator-section">
+      <h2><span class="construction-section-icon">⌖</span> Location &amp; Dimensions</h2>
+      <div class="construction-estimator-grid">
+        <label for="construction-location">Select State
+          <select id="construction-location" name="location">
+            <option value="Default" {% if request.form.get('location','Default') == 'Default' %}selected{% endif %}>Default</option>
+            {% for state in ['Andaman and Nicobar Islands','Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chandigarh','Chhattisgarh','Dadra and Nagar Haveli and Daman and Diu','Delhi','Goa','Gujarat','Haryana','Himachal Pradesh','Jammu and Kashmir','Jharkhand','Karnataka','Kerala','Ladakh','Lakshadweep','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Puducherry','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal'] %}
+            <option value="{{ state }}" {% if request.form.get('location') == state %}selected{% endif %}>{{ state }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label for="construction-city">Select City
+          <select id="construction-city" name="city" data-selected-city="{{ request.form.get('city', '') }}" disabled>
+            <option value="">Loading cities...</option>
+          </select>
+        </label>
+        <label for="area-per-floor">Total Area (sq ft)
+          <span class="construction-area-input">
+            <input id="area-per-floor" type="number" name="area_per_floor" min="1" max="1000000" step="1" inputmode="numeric" value="{{ area_per_floor or '1000' }}" required>
+            <span>sq ft</span>
+          </span>
+          <small><input id="carpet-area" type="checkbox"> I entered Carpet Area (+25%)</small>
+        </label>
+        <div class="construction-floor-control">
+          <div><strong>Floors</strong><span data-floor-readout>{{ floor_count or '1' }}</span></div>
+          <input id="floor-count" type="range" name="floor_count" min="1" max="5" step="1" value="{{ floor_count or '1' }}" aria-label="Floors">
+          <div class="construction-floor-scale"><span>G</span><span>G+4</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="construction-estimator-section">
+      <h2><span class="construction-section-icon">◆</span> Construction Quality</h2>
+      <div class="construction-quality-grid">
+        {% set selected_quality = request.form.get('quality','simple') %}
+        {% for key, label in [('simple','Simple'),('standard','Standard'),('premium','Premium'),('luxury','Luxury')] %}
+        <label class="construction-quality-option">
+          <input type="radio" name="quality" value="{{ key }}" {% if selected_quality == key %}checked{% endif %}>
+          <span>{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </section>
+
+    <details class="construction-advanced">
+      <summary>Advanced Options <span>⌄</span></summary>
+      <p>Quality ke hisaab se default rate use hota hai. Is hissa mein custom labour ya market assumptions add ho sakte hain.</p>
+    </details>
+
+    <section class="construction-rate-section">
+      <h2><span class="construction-section-icon">₹</span> Rate Customization (Optional)</h2>
+      <div class="construction-rate-grid">
+        <label for="rate-per-sqft">Construction Rate (₹/sq ft)
+          <span class="construction-rate-input"><input id="rate-per-sqft" type="number" name="rate_per_sqft" min="1" max="10000000" step="1" inputmode="numeric" value="{{ rate_per_sqft or '1500' }}"><span>/ sq ft</span></span>
+          <small data-rate-helper>Standard rate for selected location</small>
+        </label>
+        <label for="labour-rate">Labour Rate (₹/sq ft)
+          <span class="construction-rate-input"><input id="labour-rate" type="number" name="labour_rate" min="0" max="10000000" step="1" value="400"><span>/ sq ft</span></span>
+          <small>Approx labour cost per built-up area</small>
+        </label>
+      </div>
+    </section>
+
+    <button class="construction-estimate-submit" type="submit">Calculate Estimate <span>→</span></button>
+  </form>
+
+  {% if simple_estimate %}
+  <section class="simple-estimate-results construction-estimate-results" aria-live="polite" id="construction-estimate-results">
+    <div class="construction-result-heading">
+      <p class="eyebrow">ESTIMATION RESULTS</p>
+      <h2>₹{{ '{:,.0f}'.format(simple_estimate.total_cost) }}</h2>
+      <p>for {{ simple_estimate.location }}@ ₹{{ '{:,.0f}'.format(simple_estimate.rate_per_sqft) }} / sq ft</p>
+      <p class="construction-area-summary">{{ '{:,.0f}'.format(simple_estimate.area_per_floor) }} sq ft × {{ simple_estimate.floors }} manzil = {{ '{:,.0f}'.format(simple_estimate.total_area) }} sq ft</p>
+      <p>Mistri ka rate ₹{{ '{:,.0f}'.format(simple_estimate.rate_per_sqft) }} per sq ft ke hisaab se.</p>
+    </div>
+    <div class="construction-result-grid">
+      <article>
+        <h3>Cost Breakdown</h3>
+        <ul>
+          {% for item in simple_estimate.breakdown %}
+          <li><span>{{ item.name }}</span><strong>₹{{ '{:,.0f}'.format(item.amount) }}</strong></li>
+          {% endfor %}
+        </ul>
+      </article>
+      <article>
+        <h3>Floor-wise Split</h3>
+        <ul>
+          {% for floor in range(1, simple_estimate.floors + 1) %}
+          <li><span>{{ 'Ground Floor' if floor == 1 else 'Floor ' ~ floor }}</span><strong>₹{{ '{:,.0f}'.format(simple_estimate.total_cost / simple_estimate.floors) }}</strong></li>
+          {% endfor %}
+        </ul>
+      </article>
+      <article class="construction-material-table">
+        <h3>Estimated Material Quantities</h3>
+        <table>
+          <thead><tr><th>Material</th><th>Estimated Quantity</th></tr></thead>
+          <tbody>
+            {% for item in simple_estimate.quantities %}
+            <tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </article>
+    </div>
+    <button class="button secondary" type="button" data-resource-save data-resource="expenses" data-resource-payload='{{ {"description": "Ghar banane ka rough estimate", "category": "budget", "amount": simple_estimate.total_cost}|tojson }}'>Is andaaze ko kharche mein save karein</button>
+  </section>
+  {% endif %}
+
+  <details class="cost-advanced-tools" {% if detailed_estimate %}open{% endif %}>
+    <summary>Alag-alag kaam ka kharcha bharna hai? (Advanced)</summary>
+    <div class="cost-advanced-content">
+      <p>Yeh hissa tabhi bharein jab alag-alag kaamon ke kharche maloom hon.</p>
+      <form class="tool-form cost-form" method="post">
+        <input type="hidden" name="estimate_type" value="detailed">
+        <div class="form-grid cost-input-grid">
+          {% for category in categories %}
+          <label class="cost-input">{{ category }}
+            <span class="input-prefix">₹<input type="number" min="0" step="100" name="cost_{{ category }}" value="{{ values.get(category, '') }}" placeholder="0" inputmode="decimal"></span>
+          </label>
+          {% endfor %}
+        </div>
+        <div class="cost-form-footer">
+          <p class="muted">Jis kaam ka kharcha nahi pata, use khaali chhod dein.</p>
+          <button class="button primary" type="submit">Jod kar dekhein →</button>
+        </div>
+      </form>
+      {% if detailed_estimate %}
+      <div class="results cost-results">
+        <div class="results-heading">
+          <div><p class="eyebrow">KHARCHE KA HISAB</p><h2>Aapka total</h2></div>
+          <span class="formula-note">5% extra reserve included</span>
+        </div>
+        <div class="result-grid">
+          <div class="result-card"><strong>₹{{ '%.0f'|format(subtotal) }}</strong><span>Likhe hue kharche</span></div>
+          <div class="result-card"><strong>₹{{ '%.0f'|format(contingency) }}</strong><span>5% extra reserve</span></div>
+          <div class="result-card result-card-total"><strong>₹{{ '%.0f'|format(total) }}</strong><span>Andazee total</span></div>
+        </div>
+        <button class="button secondary" type="button" data-resource-save data-resource="expenses" data-resource-payload='{{ {"description": "Construction cost estimate", "category": "budget", "amount": total}|tojson }}'>Kharche mein save karein</button>
+      </div>
+      {% endif %}
+    </div>
+  </details>
+
+  <details class="cost-advanced-tools">
+    <summary>Material ka naap / detailed estimate chahiye?</summary>
+    <div class="cost-advanced-content cost-tool-links">
+      <a href="{{ url_for('materials') }}">Eent, deewar ya concrete ka hisaab</a>
+      <a href="{{ url_for('material_estimation') }}">Detailed material & steel estimate</a>
+      <a href="{{ url_for('project_estimate') }}">Kaam ke hisaab se project estimate</a>
+    </div>
+  </details>
+
+  <p class="muted cost-disclaimer">Yeh sirf rough planning andaaza hai. Asli kharcha naksha, saman ki quality, mazdoori aur ilaqe ke rate se badal sakta hai. Kharidari se pehle mistri/contractor se rate aur kaam mein shamil cheezein pakki karein.</p>
+</section>
+<script src="{{ url_for('static', filename='js/resource-api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/construction-estimator.js') }}"></script>
+{% endblock %}

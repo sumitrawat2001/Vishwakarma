@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Admin · Material Rates{% endblock %}
+{% block content %}
+<section class="section advanced-estimator admin-estimator" id="admin-estimator-app"
+  data-price-labels="{{ price_labels|tojson|forceescape }}"
+  data-rates="{{ prices|tojson|forceescape }}"
+  data-locations="{{ locations|tojson|forceescape }}"
+  data-settings="{{ settings|tojson|forceescape }}">
+  <header class="estimator-hero">
+    <div><p class="eyebrow">ADMIN / OFFICIAL RATE MANAGEMENT</p><h1>Maintain sourced<br><em>local estimates.</em></h1>
+      <p>Changes here become official saved rates. Require a traceable source; this app does not supply or invent market prices.</p></div>
+    <a class="button secondary" href="{{ url_for('admin_dashboard') }}">Back to admin dashboard</a>
+  </header>
+  <div class="estimator-alert" id="admin-price-message" role="status" hidden></div>
+
+  <section class="estimator-panel">
+    <div class="estimator-section-heading"><div><span class="eyebrow">MATERIAL CATALOGUE</span><h2>Add a material and unit</h2></div></div>
+    <form id="admin-material-catalog-form" class="estimator-fields">
+      <label>Material name<input name="name" maxlength="100" required placeholder="e.g. Waterproofing compound"></label>
+      <label>Unit<input name="unit" maxlength="40" required placeholder="e.g. litre, kg, bag"></label>
+      <button class="button secondary" type="submit">Add material</button>
+    </form>
+    {% if catalog %}<p class="estimator-caution">Custom materials: {% for item in catalog %}{{ item.get('name') }} ({{ item.get('unit') }}){% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  </section>
+
+  <section class="estimator-panel">
+    <div class="estimator-section-heading"><div><span class="eyebrow">PRICE CATALOGUE</span><h2>Add or update location-wise rates</h2></div></div>
+    <form id="admin-price-form">
+      <div class="estimator-fields">
+        <label>Price level<select name="level" required><option value="state">State</option><option value="district">District</option><option value="locality">City / village</option><option value="country">Country</option></select></label>
+        <label>Country<input name="country" value="India" required></label>
+        <label>State<input name="state" value="Uttarakhand"></label>
+        <label>District<select name="district"><option value="">Select district</option>{% for district in districts %}<option value="{{ district }}">{{ district }}</option>{% endfor %}{% for location in locations %}{% if location.get('level') == 'district' and location.get('name') not in districts %}<option value="{{ location.get('name') }}">{{ location.get('name') }}</option>{% endif %}{% endfor %}</select></label>
+        <label>City / village<input name="locality" maxlength="100" placeholder="Required for locality-level rates"></label>
+        {% for key, label in price_labels.items() %}
+        <label>{{ label }}<input type="number" min="0" max="1000000000" step="0.01" data-official-rate="{{ key }}" placeholder="Leave blank if unavailable"></label>
+        {% endfor %}
+        {% for material in catalog %}
+        <label>{{ material.get('name') }} / {{ material.get('unit') }}<input type="number" min="0" max="1000000000" step="0.01" data-official-rate="custom_{{ material.get('id') }}" placeholder="Leave blank if unavailable"></label>
+        {% endfor %}
+        <label class="estimator-field-wide">Source / quotation reference<input name="source" maxlength="200" required placeholder="Supplier quotation, dated survey, government schedule, etc."></label>
+      </div>
+      <button class="button primary" type="submit">Save sourced rates</button>
+    </form>
+  </section>
+
+  <section class="estimator-panel">
+    <div class="estimator-section-heading"><div><span class="eyebrow">LOCATION DIRECTORY</span><h2>Add district or village</h2></div></div>
+    <form id="admin-location-form" class="estimator-fields">
+      <label>Location type<select name="level"><option value="district">District</option><option value="locality">City / village</option><option value="state">State</option></select></label>
+      <label>State<input name="state" value="Uttarakhand"></label>
+      <label>District<select name="district"><option value="">Select district</option>{% for district in districts %}<option value="{{ district }}">{{ district }}</option>{% endfor %}{% for location in locations %}{% if location.get('level') == 'district' and location.get('name') not in districts %}<option value="{{ location.get('name') }}">{{ location.get('name') }}</option>{% endif %}{% endfor %}</select></label>
+      <label>New location name<input name="name" maxlength="100" required></label>
+      <button class="button secondary" type="submit">Add location</button>
+    </form>
+  </section>
+
+  <section class="estimator-panel">
+    <div class="estimator-section-heading"><div><span class="eyebrow">CALCULATION DEFAULTS</span><h2>Wastage and nominal mix settings</h2></div></div>
+    <form id="admin-estimator-settings-form">
+      <div class="estimator-fields">
+        <label>Default wastage (%)<input type="number" name="wastage_percent" min="0" max="100" step="0.1" value="{{ settings.get('wastage_percent', 5) }}" required></label>
+        <label>Concrete dry-volume factor<input type="number" name="dry_volume_factor" min="1" max="3" step="0.01" value="{{ settings.get('dry_volume_factor', 1.54) }}" required></label>
+        <label>Water-cement ratio<input type="number" name="water_cement_ratio" min="0.1" max="2" step="0.01" value="{{ settings.get('water_cement_ratio', 0.5) }}" required></label>
+        {% for grade in ['M10', 'M15', 'M20'] %}
+        {% for material in ['cement', 'sand', 'aggregate'] %}
+        <label>{{ grade }} {{ material }} ratio<input type="number" min="0.01" max="100" step="any" name="ratio_{{ grade }}_{{ material }}" value="{{ settings.get('mix_ratios', {}).get(grade, default_mix_ratios[grade]).get(material) }}" required></label>
+        {% endfor %}
+        {% endfor %}
+      </div>
+      <p class="estimator-caution">These ratios are nominal estimation defaults only. They are never represented as structural design-mix specifications.</p>
+      <button class="button primary" type="submit">Save estimator settings</button>
+    </form>
+  </section>
+
+  <section class="estimator-panel">
+    <div class="estimator-section-heading"><div><span class="eyebrow">AUDITABLE RATE RECORDS</span><h2>Saved rates and update history</h2></div></div>
+    {% if prices %}
+    <div class="estimator-table-wrap"><table class="estimator-table"><thead><tr><th>Location</th><th>Source / updated</th><th>Rates</th><th>History</th></tr></thead><tbody>
+      {% for price in prices %}
+      <tr>
+        <td>{{ price.get('locality') or price.get('district') or price.get('state') or price.get('country') }}<br><small>{{ price.get('level')|title }} · {{ price.get('country') }}</small></td>
+        <td>{{ price.get('source') }}<br><small>{{ price.get('updated_at') }}</small></td>
+        <td>{% for key, value in price.get('rates', {}).items() %}{% set rate_label = namespace(value=price_labels.get(key, key)) %}{% for material in catalog %}{% if key == 'custom_' ~ material.get('id') %}{% set rate_label.value = material.get('name') ~ ' / ' ~ material.get('unit') %}{% endif %}{% endfor %}{{ rate_label.value }}: ₹{{ value }}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
+        <td>{% for version in price.get('history', []) %}<small>{{ version.get('updated_at') }} · {{ version.get('source') }}{% if not loop.last %}<br>{% endif %}</small>{% endfor %}</td>
+      </tr>
+      {% endfor %}
+    </tbody></table></div>
+    {% else %}<p class="estimator-empty">No official rates are saved yet. Add rates only after checking a reliable current source.</p>{% endif %}
+  </section>
+</section>
+<script src="{{ url_for('static', filename='js/admin-material-prices.js') }}"></script>
+{% endblock %}

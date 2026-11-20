@@ -94,10 +94,9 @@ const setReadout = (targetId, value) => {
 
 const buildSimulationSummary = () => ({
   material: {
-    indicative_strength: document.getElementById('material-strength')?.textContent || '—',
-    estimated_material_cost: document.getElementById('material-cost')?.textContent || '—',
-    durability_indicator: document.getElementById('material-durability')?.textContent || '—',
-    overall_result: document.getElementById('material-result')?.textContent || '—',
+    quantities: document.getElementById('material-quantities')?.textContent || '—',
+    calculation_basis: document.getElementById('material-basis')?.textContent || '—',
+    notice: 'Cement uses a rough 0.45 50 kg bags per sq ft per floor assumption, rounded up. Other units are unspecified; not an IS-code quantity takeoff. Concrete strength is not calculated.',
   },
   load: {
     stress_indicator: document.getElementById('load-stress')?.textContent || '—',
@@ -126,12 +125,19 @@ const buildSimulationSummary = () => ({
 const bindSimulationLab = () => {
   const materialForm = document.getElementById('material-form');
   if (materialForm) {
-    materialForm.querySelector('button[type="submit"]').dataset.originalText = 'Run Simulation';
+    const materialButton = materialForm.querySelector('button[type="submit"]');
+    if (materialButton) materialButton.dataset.originalText = 'Run Simulation';
     applySimulationForm('material-form', '/api/simulation/material', (data) => {
-      setReadout('material-strength', data.indicative_strength || '—');
-      setReadout('material-cost', `₹${Number(data.estimated_material_cost || 0).toLocaleString()}`);
-      setReadout('material-durability', data.durability_indicator || '—');
-      setReadout('material-result', data.overall_result || '—');
+      const units = data.material_units || {};
+      const quantities = Object.entries(data.material_quantities || {})
+        .map(([name, value]) => `${name}: ${Number(value).toLocaleString()} ${units[name] || 'unit unspecified'}`)
+        .join(' · ');
+      setReadout('material-quantities', quantities || 'No quantities returned.');
+      setReadout('material-basis', data.calculation_basis || 'Cement: area per floor × floors × 0.45 bags, rounded up.');
+      const notice = document.querySelector('.material-estimate-notice');
+      if (notice) {
+        notice.textContent = `${data.unit_warning || ''} ${data.strength_assessment || ''}`.trim();
+      }
     });
   }
 
@@ -264,7 +270,7 @@ const bindSimulationLab = () => {
       }
 
       const outcome = {
-        material: document.getElementById('material-strength')?.textContent || '—',
+        material: document.getElementById('material-quantities')?.textContent || '—',
         load: document.getElementById('load-stress')?.textContent || '—',
         rainwater: document.getElementById('rainwater-collected')?.textContent || '—',
         solar: document.getElementById('solar-capacity')?.textContent || '—',
@@ -338,6 +344,26 @@ const bindPlannerApp = () => {
 	const roomPlacements = {};
 	const palette = [...document.querySelectorAll('.room-tool')];
 	const roomDimensionInputs = [...document.querySelectorAll('.room-dim-input')];
+	const layoutDataInput = document.querySelector('#layout-data');
+	document.querySelectorAll('[id^="form-room-"]').forEach((input, index) => {
+		const room = palette[index]?.dataset.room;
+		const count = Number(input.value) || 0;
+		if (room && count > 0) roomCounts[room] = count;
+	});
+	if (layoutDataInput) {
+		try {
+			const savedLayout = JSON.parse(layoutDataInput.value || '{}');
+			Object.entries(savedLayout).forEach(([room, positions]) => {
+				if (Array.isArray(positions)) {
+					roomPlacements[room] = positions
+						.filter((position) => Number.isFinite(Number(position?.x)) && Number.isFinite(Number(position?.y)))
+						.map((position) => ({ x: Number(position.x), y: Number(position.y) }));
+				}
+			});
+		} catch (error) {
+			console.error('Unable to load saved room positions.', error);
+		}
+	}
 	const colors = ['#d7eadb', '#f4d8bb', '#d8e1f1', '#f1e0b6', '#e4d6e8'];
 	const createPlacement = (room, index) => {
 		const slots = 3;
@@ -393,11 +419,6 @@ const bindPlannerApp = () => {
 	const render = () => {
 		roomLayer.innerHTML = '';
 		const roomDimensions = syncRoomDimensions();
-		const active = Object.entries(roomCounts).filter(([, count]) => count > 0);
-		if (active.length === 0) {
-			console.warn('No rooms added. Adding a sample room for visualization.');
-			roomCounts['Sample Room'] = 1;
-		}
 		ensureRoomPlacements();
 		const roomEntries = [];
 		Object.entries(roomCounts).forEach(([name, count]) => {
@@ -460,6 +481,19 @@ const bindPlannerApp = () => {
 		});
 	};
 	palette.forEach((button) => button.addEventListener('click', () => { const room = button.dataset.room; roomCounts[room] = (roomCounts[room] || 0) + 1; render(); }));
+	const plannerForm = document.querySelector('#planner-form');
+	if (plannerForm && layoutDataInput) {
+		plannerForm.addEventListener('submit', () => {
+			ensureRoomPlacements();
+			const savedLayout = {};
+			Object.entries(roomCounts).forEach(([room, count]) => {
+				if (count > 0 && roomPlacements[room]) {
+					savedLayout[room] = roomPlacements[room].slice(0, count);
+				}
+			});
+			layoutDataInput.value = JSON.stringify(savedLayout);
+		});
+	}
 	roomDimensionInputs.forEach((input) => input.addEventListener('input', () => {
 		syncRoomDimensions();
 		render();
@@ -543,6 +577,10 @@ const bindPlannerApp = () => {
 		if (canvas3D.style.display === 'none') {
 			canvas3D.style.display = 'block';
 		}
+		canvas3D.style.overflow = 'hidden';
+		canvas3D.style.borderRadius = '0 0 14px 14px';
+		canvas3D.style.touchAction = 'none';
+		canvas3D.title = 'Drag to rotate; scroll or pinch to zoom';
 		const fallbackWidth = canvas3D.clientWidth || canvas3D.parentElement?.clientWidth || 720;
 		const fallbackHeight = canvas3D.clientHeight || 520;
 		canvas3D.style.width = '100%';
@@ -560,14 +598,14 @@ const bindPlannerApp = () => {
 			camera = null;
 		}
 			scene = new THREE.Scene();
-			scene.background = new THREE.Color(0xf5f1e8);
-			scene.fog = new THREE.Fog(0xf5f1e8, 600, 1800);
+			scene.background = new THREE.Color(0xdce8ef);
+			scene.fog = new THREE.Fog(0xdce8ef, 700, 1900);
 		
 		camera = new THREE.PerspectiveCamera(52, canvas3D.clientWidth / canvas3D.clientHeight, 0.1, 2000);
 		const cameraTarget = new THREE.Vector3(0, 52, 0);
 		let azimuth = 1.1;
 		let elevation = 0.62;
-		let distance = 820;
+		let distance = 720;
 		const updateCamera = () => {
 			const x = cameraTarget.x + distance * Math.sin(azimuth) * Math.cos(elevation);
 			const y = cameraTarget.y + distance * Math.sin(elevation);
@@ -580,8 +618,13 @@ const bindPlannerApp = () => {
 		renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 		renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 		renderer.setSize(canvas3D.clientWidth, canvas3D.clientHeight);
+		renderer.outputEncoding = THREE.sRGBEncoding;
+		renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		renderer.toneMappingExposure = 1.05;
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		renderer.domElement.style.display = 'block';
+		renderer.domElement.style.cursor = 'grab';
 		canvas3D.appendChild(renderer.domElement);
 		
 		const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
@@ -593,6 +636,11 @@ const bindPlannerApp = () => {
 		directionalLight.castShadow = true;
 		directionalLight.shadow.mapSize.width = 2048;
 		directionalLight.shadow.mapSize.height = 2048;
+		directionalLight.shadow.camera.left = -500;
+		directionalLight.shadow.camera.right = 500;
+		directionalLight.shadow.camera.top = 500;
+		directionalLight.shadow.camera.bottom = -500;
+		directionalLight.shadow.bias = -0.0002;
 		scene.add(directionalLight);
 		
 		const ground = new THREE.Mesh(
@@ -806,11 +854,13 @@ const bindPlannerApp = () => {
 		applySceneState();
 		let isDragging = false;
 		let previousMousePosition = { x: 0, y: 0 };
-		canvas3D.addEventListener('mousedown', (event) => {
+		canvas3D.addEventListener('pointerdown', (event) => {
 			isDragging = true;
 			previousMousePosition = { x: event.clientX, y: event.clientY };
+			canvas3D.setPointerCapture(event.pointerId);
+			renderer.domElement.style.cursor = 'grabbing';
 		});
-		canvas3D.addEventListener('mousemove', (event) => {
+		canvas3D.addEventListener('pointermove', (event) => {
 			if (!isDragging) return;
 			const deltaX = event.clientX - previousMousePosition.x;
 			const deltaY = event.clientY - previousMousePosition.y;
@@ -819,8 +869,12 @@ const bindPlannerApp = () => {
 			previousMousePosition = { x: event.clientX, y: event.clientY };
 			updateCamera();
 		});
-		canvas3D.addEventListener('mouseup', () => { isDragging = false; });
-		canvas3D.addEventListener('mouseleave', () => { isDragging = false; });
+		const stopDragging = () => {
+			isDragging = false;
+			if (renderer) renderer.domElement.style.cursor = 'grab';
+		};
+		canvas3D.addEventListener('pointerup', stopDragging);
+		canvas3D.addEventListener('pointercancel', stopDragging);
 		canvas3D.addEventListener('wheel', (event) => {
 			event.preventDefault();
 			distance = Math.min(980, Math.max(180, distance + event.deltaY * 0.02));
@@ -901,6 +955,6 @@ if (document.getElementById('material-form') || document.getElementById('load-fo
   bindSimulationLab();
 }
 
-if (document.querySelector('.planner-app')) {
+if (document.querySelector('.planner-app:not([data-planner-enhanced])')) {
   bindPlannerApp();
 }

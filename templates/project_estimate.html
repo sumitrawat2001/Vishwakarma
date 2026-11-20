@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Complete Project Estimate{% endblock %}
+{% block content %}
+<section class="section project-estimate-page">
+  <header class="estimate-hero">
+    <div>
+      <p class="eyebrow">VISHWAKARMA / PROJECT ESTIMATE</p>
+      <h1>Plan costs.<br><em>Phase by phase.</em></h1>
+      <p class="estimate-lead">Apne measured quantities aur local rates enter karo. Har phase ka total aur poore project ka estimate ek jagah dekho.</p>
+    </div>
+    <aside class="estimate-hero-card">
+      <span class="estimate-hero-icon" aria-hidden="true">₹</span>
+      <strong>Clear project costing</strong>
+      <p>Quantity × local rate = item cost. Sirf wahi kaam total mein aayega jo aap fill karoge.</p>
+      <a href="{{ url_for('materials') }}">Need material quantities? Open calculator <span aria-hidden="true">→</span></a>
+    </aside>
+  </header>
+
+  <div class="estimate-notice">
+    <span class="estimate-notice-icon" aria-hidden="true">i</span>
+    <div>
+      <strong>Start with your drawings or site measurements</strong>
+      <p>RCC aur steel quantities engineer-approved drawings / BBS se lo. Ye preliminary cost planner hai, certified BOQ ya structural safety check nahi.</p>
+    </div>
+  </div>
+
+  {% if estimate_error %}
+  <div class="estimate-error" role="alert"><strong>Estimate nahi ban saka:</strong> {{ estimate_error }}</div>
+  {% endif %}
+
+  <form method="post" class="estimate-form" id="project-estimate-form">
+    <div class="estimate-project-card">
+      <label for="estimate-project-name">Project name <span>Optional</span></label>
+      <input id="estimate-project-name" type="text" name="project_name" maxlength="120" value="{{ request.form.get('project_name', '') }}" placeholder="e.g. Rawat Residence">
+      <small>Estimate print/PDF par ye naam dikhai dega.</small>
+    </div>
+
+    <div class="estimate-section-heading">
+      <div>
+        <p class="eyebrow">YOUR WORK BREAKDOWN</p>
+        <h2>Choose a phase to fill</h2>
+      </div>
+      <span class="estimate-units-note">Rates ₹ per unit · Units har item ke saath diye hain</span>
+    </div>
+
+    <section class="estimate-overview" aria-label="Estimate progress">
+      <div class="estimate-overview-heading">
+        <div><span class="estimate-overview-kicker">QUICK OVERVIEW</span><strong>Your estimate at a glance</strong></div>
+        <span class="estimate-overview-progress" data-estimate-progress-label>0 of {{ work_phases|length }} phases started</span>
+      </div>
+      <div class="estimate-progress-track" role="progressbar" aria-label="Estimate phase completion" aria-valuemin="0" aria-valuemax="{{ work_phases|length }}" aria-valuenow="0" data-estimate-progress>
+        <span></span>
+      </div>
+      <div class="estimate-overview-stats">
+        <div><span>Phases started</span><strong data-estimate-phase-count>0 / {{ work_phases|length }}</strong></div>
+        <div><span>Items with a rate</span><strong data-estimate-priced-count>0</strong></div>
+        <div><span>Rates to add</span><strong data-estimate-unpriced-count>0</strong></div>
+      </div>
+    </section>
+
+    <nav class="estimate-phase-nav" aria-label="Estimate work phases">
+      {% for phase in work_phases %}
+      <a href="#phase-{{ phase.key }}" data-phase-link="{{ phase.key }}"><span>{{ '%02d'|format(loop.index) }}</span>{{ phase.name }}</a>
+      {% endfor %}
+    </nav>
+
+    {% set active_phase = namespace(key='') %}
+    {% for phase in work_phases %}
+      {% set phase_has_values = namespace(value=false) %}
+      {% for item in phase['items'] %}
+        {% if request.form.get('qty_' ~ item.key) %}
+          {% set phase_has_values.value = true %}
+        {% endif %}
+      {% endfor %}
+      {% if not active_phase.key and phase_has_values.value %}
+        {% set active_phase.key = phase.key %}
+      {% endif %}
+    {% endfor %}
+
+    <div class="estimate-phase-list">
+    {% for phase in work_phases %}
+      {% set phase_has_values = namespace(value=false) %}
+      {% for item in phase['items'] %}
+        {% if request.form.get('qty_' ~ item.key) %}
+          {% set phase_has_values.value = true %}
+        {% endif %}
+      {% endfor %}
+      <details class="estimate-phase" id="phase-{{ phase.key }}" data-phase="{{ phase.key }}" {% if (active_phase.key and active_phase.key == phase.key) or (not active_phase.key and loop.first) %}open{% endif %}>
+        <summary>
+          <span class="estimate-phase-number">{{ '%02d'|format(loop.index) }}</span>
+          <span class="estimate-phase-title"><strong>{{ phase.name }}</strong><small>{{ phase['items']|length }} work items · Optional, fill what applies</small></span>
+          <span class="estimate-phase-status" data-phase-status>{{ 'Ready to review' if phase_has_values.value else 'Not started' }}</span>
+          <span class="estimate-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="estimate-phase-content">
+          {% for item in phase['items'] %}
+          <div class="estimate-work-item" data-estimate-item>
+            <div class="estimate-work-name">
+              <span class="estimate-item-check" aria-hidden="true">✓</span>
+              <label for="qty-{{ item.key }}">{{ item.name }}</label>
+              <span class="estimate-unit-tag">{{ item.unit }}</span>
+            </div>
+            <div class="estimate-input-group">
+              <label for="qty-{{ item.key }}">Quantity <span>({{ item.unit }})</span></label>
+              <input id="qty-{{ item.key }}" type="number" min="0.001" max="1000000000" step="any" name="qty_{{ item.key }}" value="{{ request.form.get('qty_' ~ item.key, '') }}" placeholder="Skip if not needed" data-estimate-quantity>
+            </div>
+            <div class="estimate-input-group">
+              <label for="rate-{{ item.key }}">Rate <span>(₹ / {{ item.unit }})</span></label>
+              <div class="estimate-rate-input"><span>₹</span><input id="rate-{{ item.key }}" aria-label="Local rate per {{ item.unit }} for {{ item.name }}" type="number" min="0" max="1000000000000" step="0.01" name="rate_{{ item.key }}" value="{{ request.form.get('rate_' ~ item.key, '') }}" placeholder="Your local rate" data-estimate-rate></div>
+            </div>
+            <strong class="estimate-item-amount" data-estimate-amount aria-label="Item amount">—</strong>
+          </div>
+          {% endfor %}
+          <p class="estimate-phase-hint">Tip: Quantity ya rate maloom nahi? Is item ko blank chhod do—estimate mein include nahi hoga.</p>
+        </div>
+      </details>
+    {% endfor %}
+    </div>
+
+    <section class="estimate-contingency-card">
+      <span class="estimate-contingency-icon" aria-hidden="true">+</span>
+      <div class="estimate-contingency-copy">
+        <strong>Contingency allowance</strong>
+        <p>Optional buffer. Apne project ke hisaab se set karo; default mein koi extra amount add nahi hota.</p>
+      </div>
+      <label class="estimate-percent-input" for="contingency-percent"><input id="contingency-percent" type="number" name="contingency_percent" min="0" max="100" step="0.5" value="{{ request.form.get('contingency_percent', '0') }}"><span>%</span></label>
+    </section>
+
+    <div class="estimate-submit-row">
+      <p>Rates supplier/contractor se confirm karna. Tax, transport aur labour inclusions alag ho sakte hain.</p>
+      <button class="button primary estimate-submit" type="submit">Calculate full estimate <span aria-hidden="true">→</span></button>
+    </div>
+
+    <aside class="estimate-live-summary" aria-live="polite" {% if estimate %}hidden{% endif %}>
+      <span class="estimate-live-icon" aria-hidden="true">₹</span>
+      <div><small>Live estimate preview</small><strong data-estimate-live-total>₹0</strong><span data-estimate-live-count>Abhi koi item add nahi kiya</span></div>
+      <a href="#estimate-results" data-estimate-results-link hidden>View breakdown ↓</a>
+    </aside>
+  </form>
+
+  {% if estimate %}
+  <section class="estimate-results" id="estimate-results" aria-live="polite">
+    <div class="estimate-result-heading">
+      <div><p class="eyebrow">YOUR COST SUMMARY</p><h2>{{ estimate.project_name }}</h2><p>Entered work ka phase-wise cost breakdown</p></div>
+      <div class="estimate-result-actions">
+        <button class="button secondary estimate-export" type="button" data-estimate-export>Download CSV <span aria-hidden="true">↓</span></button>
+        <button class="button secondary estimate-print" type="button" onclick="window.print()">Print / Save as PDF <span aria-hidden="true">↗</span></button>
+      </div>
+    </div>
+    <div class="estimate-result-cards">
+      {% for phase in estimate.phases %}
+        {% if phase['items'] %}
+        <article class="estimate-result-phase">
+          <div class="estimate-phase-total"><div><span>{{ phase['items']|length }} item{{ '' if phase['items']|length == 1 else 's' }}</span><h3>{{ phase.name }}</h3></div><strong>₹{{ '{:,.2f}'.format(phase.subtotal) }}</strong></div>
+          <div class="estimate-table-wrap">
+            <table class="estimate-table result-table">
+              <thead><tr><th>Work item</th><th>Quantity</th><th>Rate</th><th>Amount</th></tr></thead>
+              <tbody>
+                {% for item in phase['items'] %}
+                <tr><td>{{ item.name }}</td><td>{{ item.quantity }} {{ item.unit }}</td><td>₹{{ '{:,.2f}'.format(item.rate) }} / {{ item.unit }}</td><td>₹{{ '{:,.2f}'.format(item.amount) }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+        {% endif %}
+      {% endfor %}
+      <aside class="estimate-grand-total">
+        <div><span>Measured work subtotal</span><strong>₹{{ '{:,.2f}'.format(estimate.subtotal) }}</strong></div>
+        <div><span>Contingency ({{ estimate.contingency_percent }}%)</span><strong>₹{{ '{:,.2f}'.format(estimate.contingency_amount) }}</strong></div>
+        <div class="estimate-final-total"><span>Total estimate</span><strong>₹{{ '{:,.2f}'.format(estimate.grand_total) }}</strong></div>
+      </aside>
+    </div>
+    <p class="estimate-footnote">Total sirf aapke enter kiye quantities aur rates cover karta hai. Budget/order se pehle taxes, transport, labour, wastage aur supplier quotations verify karein.</p>
+  </section>
+  {% endif %}
+</section>
+<script src="{{ url_for('static', filename='js/project-estimate.js') }}"></script>
+{% endblock %}

@@ -10,11 +10,12 @@
     <nav class="dashboard-side-nav">
       <a class="active" href="{{ url_for('dashboard') }}">Dashboard</a>
       <a href="{{ url_for('planner') }}">House Planner</a>
-      <a href="{{ url_for('materials') }}">Material Estimation</a>
-      <a href="{{ url_for('cost') }}">Cost Estimation</a>
+      <a href="{{ url_for('structural_design') }}">Structural Design</a>
+      <a href="{{ url_for('cost') }}">Material Estimation</a>
       <a href="{{ url_for('solar') }}">Solar Calculator</a>
       <a href="{{ url_for('rainwater') }}">Rainwater Harvesting</a>
       <a href="{{ url_for('simulation') }}">Simulation Lab</a>
+      <a href="{{ url_for('vastu_analysis') }}">Vastu Analysis</a>
       <a href="{{ url_for('projects') }}">My Projects</a>
       <a href="{{ url_for('support') }}">Support</a>
     </nav>
@@ -83,10 +84,10 @@
       </div>
       <div class="quick-grid">
         <a class="button primary" href="{{ url_for('planner') }}">New house plan →</a>
-        <a class="button" href="{{ url_for('materials') }}">Material estimate →</a>
-        <a class="button" href="{{ url_for('cost') }}">Cost calculator →</a>
+        <a class="button" href="{{ url_for('cost') }}">Material Estimation →</a>
         <a class="button" href="{{ url_for('solar') }}">Solar calculator →</a>
         <a class="button" href="{{ url_for('rainwater') }}">Rainwater calculator →</a>
+        <a class="button" href="{{ url_for('vastu_analysis') }}">Vastu analysis →</a>
       </div>
     </div>
 

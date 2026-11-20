@@ -55,6 +55,11 @@ RESOURCE_SCHEMAS = {
         'enums': {'status': ('draft', 'issued', 'paid', 'overdue', 'cancelled')},
         'defaults': {'status': 'draft', 'due_date': ''},
     },
+    'structural_designs': {
+        'required': ('name', 'design_data'),
+        'strings': ('name',),
+        'objects': ('design_data', 'rates'),
+    },
 }
 
 
@@ -82,6 +87,14 @@ def validate_resource(resource_type, payload, user_id, project_id=None):
     for field in schema.get('numbers', ()):
         if field in payload and payload[field] not in (None, ''):
             document[field] = _number(payload[field], field)
+    for field in schema.get('objects', ()):
+        if field in payload:
+            value = payload[field]
+            if not isinstance(value, dict):
+                raise ResourceValidationError(f'{field} must be an object.')
+            if len(json.dumps(value, separators=(',', ':'), default=str)) > 100_000:
+                raise ResourceValidationError(f'{field} cannot exceed 100 KB.')
+            document[field] = value
     for field in schema.get('enums', {}):
         if field in payload and payload[field] not in (None, ''):
             document[field] = str(payload[field]).strip().lower()

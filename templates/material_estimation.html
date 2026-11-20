@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% block title %}Advanced Material Estimation{% endblock %}
+{% block content %}
+<section class="section advanced-estimator" id="estimator-app"
+  data-districts="{{ location_options.districts|tojson|forceescape }}"
+  data-villages="{{ location_options.villages|tojson|forceescape }}"
+  data-states="{{ location_options.states|tojson|forceescape }}"
+  data-prices="{{ prices|tojson|forceescape }}"
+  data-rates="{{ price_labels|tojson|forceescape }}"
+  data-catalog="{{ material_catalog|tojson|forceescape }}"
+  data-settings="{{ settings|tojson|forceescape }}">
+  <header class="estimator-hero">
+    <div>
+      <p class="eyebrow"><span class="estimator-hero-mark" aria-hidden="true">V</span> VISHWAKARMA <span class="estimator-hero-divider">/</span> MATERIAL ESTIMATION</p>
+      <h1>Plan smarter.<br><em>Build with clarity.</em></h1>
+      <p>Turn your measurements into a clear material takeoff, a preliminary steel schedule, and a location-aware cost summary.</p>
+      <div class="estimator-hero-points" aria-label="Estimator features">
+        <span><i aria-hidden="true">✓</i> Dimension based</span>
+        <span><i aria-hidden="true">✓</i> Local rate aware</span>
+        <span><i aria-hidden="true">✓</i> Report ready</span>
+      </div>
+    </div>
+    <aside class="estimator-disclaimer">
+      <span class="estimator-disclaimer-icon" aria-hidden="true">i</span>
+      <div><span class="estimator-disclaimer-label">A QUICK NOTE</span><strong>Planning estimate only</strong>
+      <p>Nominal concrete proportions are not a structural design mix. Steel quantities are preliminary. Verify drawings, BBS, specifications, supplier quotes, and site conditions with qualified professionals.</p>
+      </div>
+    </aside>
+  </header>
+
+  {% if load_error %}<div class="estimator-alert error" role="alert">{{ load_error }}</div>{% endif %}
+  <div class="estimator-alert" id="estimator-message" role="status" hidden></div>
+
+  <details class="estimator-other-tools">
+    <summary>Looking for a simpler estimate?</summary>
+    <div>
+      <a href="{{ url_for('project_estimate') }}">Phase-wise project cost</a>
+      <a href="{{ url_for('materials') }}">Basic material calculator</a>
+      <a href="{{ url_for('cost') }}">Quick cost calculator</a>
+    </div>
+  </details>
+
+  <nav class="estimator-tabs" aria-label="Estimation steps">
+    <a href="#project-location">1. Project</a>
+    <a href="#quantity-estimation">2. Quantities</a>
+    <a href="#location-pricing">3. Rates & costs</a>
+    <a href="#estimation-history">Saved estimates</a>
+    {% if session.get('user_role') == 'admin' %}<a href="{{ url_for('admin_material_prices') }}">Price management</a>{% endif %}
+  </nav>
+
+  <form id="material-estimation-form" novalidate>
+    <details class="estimator-panel estimator-step" id="project-location" open>
+      <summary class="estimator-step-summary">
+        <span class="estimator-step-number">1</span>
+        <span class="estimator-step-title"><strong>Project details</strong><small>Give your project a name and choose its location</small></span>
+        <span class="estimator-step-toggle">Edit details</span>
+      </summary>
+      <div class="estimator-step-content">
+        <div class="estimator-fields">
+          <label>Project name<input name="project_name" maxlength="120" placeholder="e.g. Rawat Residence"></label>
+          <label>Country<input name="country" value="India" required></label>
+          <label>State<input name="state" list="estimator-state-options" value="Uttarakhand" required><datalist id="estimator-state-options">{% for state in location_options.states %}<option value="{{ state }}">{% endfor %}</datalist></label>
+          <label>District<select name="district" required><option value="">Select district</option>{% for district in location_options.districts %}<option value="{{ district }}">{{ district }}</option>{% endfor %}</select></label>
+          <label>City / village<input name="locality" list="estimator-locality-options" placeholder="Optional; district rate used when unavailable"><datalist id="estimator-locality-options"></datalist></label>
+          <label>Built-up area (sq ft)<input name="built_up_area_sqft" type="number" min="0" max="100000000" step="any" placeholder="Used for cost per area"></label>
+        </div>
+        <details class="estimator-advanced-settings">
+          <summary>Advanced quantity assumptions (optional)</summary>
+          <div class="estimator-fields">
+            <label>Default material wastage (%)<input name="wastage_percent" type="number" min="0" max="100" step="0.1" value="{{ settings.get('wastage_percent', 5) }}" required></label>
+            <label>Concrete dry-volume factor<input name="dry_volume_factor" type="number" min="1" max="3" step="0.01" value="{{ settings.get('dry_volume_factor', 1.54) }}" required></label>
+            <label>Water-cement ratio<input name="water_cement_ratio" type="number" min="0.1" max="2" step="0.01" value="{{ settings.get('water_cement_ratio', 0.5) }}" required></label>
+          </div>
+        </details>
+      </div>
+    </details>
+
+    <details class="estimator-panel estimator-step" id="quantity-estimation" open>
+      <summary class="estimator-step-summary">
+        <span class="estimator-step-number">2</span>
+        <span class="estimator-step-title"><strong>Materials & steel quantities</strong><small>Add only the building parts in your plans</small></span>
+        <span class="estimator-step-toggle">Add quantities</span>
+      </summary>
+      <div class="estimator-step-content">
+        <div id="component-estimation" class="estimator-subsection">
+          <div class="estimator-subsection-heading">
+            <div><h3>Building components</h3><p>Only entered components are counted. Avoid entering overlapping volumes twice.</p></div>
+          </div>
+          <div class="estimator-add-buttons" aria-label="Add building component">
+            <button type="button" class="button secondary" data-add-component="foundation">+ Foundation</button>
+            <button type="button" class="button secondary" data-add-component="footing">+ Footing</button>
+            <button type="button" class="button secondary" data-add-component="column">+ Column</button>
+            <button type="button" class="button secondary" data-add-component="beam">+ Beam</button>
+            <button type="button" class="button secondary" data-add-component="slab">+ RCC slab</button>
+            <button type="button" class="button secondary" data-add-component="brick_wall">+ Brick wall</button>
+            <button type="button" class="button secondary" data-add-component="internal_plaster">+ Internal plaster</button>
+            <button type="button" class="button secondary" data-add-component="external_plaster">+ External plaster</button>
+            <button type="button" class="button secondary" data-add-component="flooring">+ Flooring</button>
+            <button type="button" class="button secondary" data-add-component="painting">+ Painting</button>
+          </div>
+          <div id="estimator-components" class="estimator-component-list">
+            <p class="estimator-empty">Add the components shown in your plans or measurements.</p>
+          </div>
+        </div>
+        <details id="steel-estimation" class="estimator-optional-tool">
+          <summary>Steel estimate / bar schedule <span>Optional</span></summary>
+          <div class="estimator-optional-tool-content">
+            <p>Weight = (diameter² / 162) × total bar length in metres. Include laps and bends only as specified.</p>
+            <div class="estimator-add-buttons" aria-label="Add steel bars">
+              {% for component in ['Slab', 'Beam', 'Column', 'Footing', 'Foundation'] %}
+              <button type="button" class="button secondary" data-add-steel="{{ component }}">+ {{ component }} bars</button>
+              {% endfor %}
+            </div>
+            <div id="estimator-steel-bars" class="estimator-component-list"><p class="estimator-empty">Add bar groups to prepare a preliminary schedule.</p></div>
+            <p class="estimator-caution">Steel totals are preliminary estimates, not a reinforcement design or approved BBS.</p>
+          </div>
+        </details>
+      </div>
+    </details>
+
+    <details class="estimator-panel estimator-step" id="location-pricing">
+      <summary class="estimator-step-summary">
+        <span class="estimator-step-number">3</span>
+        <span class="estimator-step-title"><strong>Rates & other costs</strong><small>Use available local rates or enter your own</small></span>
+        <span class="estimator-step-toggle">Add costs</span>
+      </summary>
+      <div class="estimator-step-content">
+        <div class="estimator-subsection">
+          <div class="estimator-subsection-heading">
+            <div><h3>Material rates</h3><p>Rates use locality → district → state → country records. Unavailable market prices are not filled in.</p></div>
+          </div>
+          <div class="estimator-fields">
+            {% for key, label in price_labels.items() %}
+            <label>{{ label }} <span class="field-note">optional one-estimate override</span>
+              <input type="number" min="0" max="1000000000" step="0.01" data-manual-rate="{{ key }}" placeholder="Use sourced location rate">
+            </label>
+            {% endfor %}
+          </div>
+          <p class="estimator-caution">Manual overrides affect only this estimate. Official rates require a source and update date.</p>
+          <div class="estimator-extra-material-heading">
+            <div><h3>Additional materials <span class="field-note">optional</span></h3><p>Add items from the material catalogue.</p></div>
+            <button class="button secondary" type="button" id="add-custom-material">+ Add material</button>
+          </div>
+          <div id="estimator-custom-materials" class="estimator-component-list">
+            <p class="estimator-empty">No additional material line items added.</p>
+          </div>
+          {% if not material_catalog %}<p class="estimator-caution">No custom catalogue items are available yet. An administrator can add them in Price Management.</p>{% endif %}
+          <div id="estimator-price-sources" class="estimator-source-list"></div>
+        </div>
+        <div class="estimator-subsection estimator-other-costs">
+          <div class="estimator-subsection-heading"><div><h3>Labour, transport & other costs</h3></div></div>
+          <div class="estimator-fields">
+            <label>Labour area (sq ft)<input name="labour_area_sqft" type="number" min="0" max="100000000" step="any" placeholder="Defaults to built-up area"></label>
+            <label>Labour days if priced per day<input name="labour_days" type="number" min="0" max="1000000" step="any" value="0"></label>
+            <label>Transport distance (km)<input name="transport_distance_km" type="number" min="0" max="1000000" step="any" value="0"></label>
+            <label>Transport trips<input name="transport_trips" type="number" min="0" max="1000000" step="1" value="0"></label>
+            <label>Other material costs (INR)<input name="other_material_cost" type="number" min="0" max="1000000000000" step="0.01" value="0"></label>
+            <label>Equipment cost (INR)<input name="equipment_cost" type="number" min="0" max="1000000000000" step="0.01" value="0"></label>
+            <label>Other expenses (INR)<input name="other_expenses" type="number" min="0" max="1000000000000" step="0.01" value="0"></label>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="estimator-submit-row">
+      <button class="button primary" type="submit" id="calculate-estimate">Calculate and save estimate →</button>
+      <span>Each successful calculation is saved to your estimation history.</span>
+    </div>
+  </form>
+
+  <section class="estimator-panel estimator-results" id="estimator-results" hidden>
+    <div class="estimator-section-heading" id="cost-summary">
+      <div><span class="eyebrow">06 / COST SUMMARY</span><h2>Estimate results</h2></div>
+      <a class="button primary" id="estimate-pdf-link" href="#" hidden>Download PDF report</a>
+    </div>
+    <div id="estimator-fallback-notice" class="estimator-alert warning" hidden></div>
+    <div class="estimator-result-grid">
+      <div><span>Known / priced total</span><strong id="known-total">INR 0</strong><small id="estimate-completeness"></small></div>
+      <div><span>Cost per sq ft</span><strong id="cost-per-sqft">—</strong></div>
+      <div><span>Cost per sq m</span><strong id="cost-per-sqm">—</strong></div>
+    </div>
+    <section class="estimator-cost-visual" aria-labelledby="estimator-cost-visual-title">
+      <div class="estimator-cost-visual-heading">
+        <div><span class="eyebrow">COST VISUALIZATION</span><h3 id="estimator-cost-visual-title">Where your budget goes</h3></div>
+        <span class="estimator-cost-visual-note">Priced items only</span>
+      </div>
+      <div id="estimator-cost-breakdown" class="estimator-cost-breakdown" aria-live="polite"></div>
+    </section>
+    <div class="estimator-table-wrap" id="quantity-summary"></div>
+    <div class="estimator-table-wrap" id="component-breakdown"></div>
+    <div id="estimator-assumptions" class="materials-basis"></div>
+  </section>
+
+  <details class="estimator-panel estimator-step estimator-history-step" id="estimation-history">
+    <summary class="estimator-step-summary">
+      <span class="estimator-step-number">✓</span>
+      <span class="estimator-step-title"><strong>Saved estimates</strong><small>Open a previous estimate or download its PDF</small></span>
+      <span class="estimator-step-toggle">View history</span>
+    </summary>
+    <div class="estimator-step-content">
+      <div id="estimator-history-list">
+        {% if history %}
+        <div class="estimator-history-list">
+          {% for item in history %}
+          <article class="estimator-history-item">
+            <div><strong>{{ item.get('project_name', 'Untitled project') }}</strong><span>{{ item.get('created_at', '') }} · {{ item.get('location', {}).get('locality') or item.get('location', {}).get('district') or 'Location not set' }}</span></div>
+            <a class="button secondary" href="{{ url_for('material_estimation_report_pdf', history_id=item.get('id')) }}">PDF report</a>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}<p class="estimator-empty">Saved estimates and PDF reports will appear here after calculation.</p>{% endif %}
+      </div>
+    </div>
+  </details>
+</section>
+<script src="{{ url_for('static', filename='js/material-estimation.js') }}"></script>
+{% endblock %}

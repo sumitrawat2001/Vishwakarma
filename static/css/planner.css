@@ -1,0 +1,1077 @@
+.planner-app {
+  --planner-ink: #172b3b;
+  --planner-muted: #617283;
+  --planner-line: #dce5eb;
+  --planner-blue: #3269db;
+  --planner-paper: #f5f8fa;
+  max-width: 1680px;
+  min-height: calc(100vh - 88px);
+  margin: 0 auto;
+  padding: clamp(14px, 2.8vw, 36px);
+  color: var(--planner-ink);
+  background:
+    radial-gradient(ellipse at 82% 0%, rgba(216, 232, 247, .8), transparent 40%),
+    linear-gradient(180deg, #f3f7fa, #edf2f5);
+}
+
+.planner-app * {
+  box-sizing: border-box;
+}
+
+.planner-top {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 auto 18px;
+  padding: clamp(8px, 1.8vw, 22px) 2px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.planner-top .eyebrow {
+  margin: 0;
+  color: #56718c;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.planner-top h1 {
+  margin: 9px 0 8px;
+  color: var(--planner-ink);
+  font-size: clamp(2rem, 4vw, 3.45rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -.055em;
+}
+
+.planner-top h1 em {
+  color: var(--planner-blue);
+  font-style: normal;
+}
+
+.planner-lead {
+  max-width: 660px;
+  margin: 0;
+  color: var(--planner-muted);
+  font-size: .96rem;
+  line-height: 1.55;
+}
+
+.planner-actions {
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.planner-actions .editor-button {
+  min-height: 44px;
+  padding: 10px 16px;
+}
+
+.planner-actions .editor-button.filled {
+  background: linear-gradient(135deg, #3269db, #5688ed);
+  box-shadow: 0 9px 18px rgba(50, 105, 219, .18);
+}
+
+.planner-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 auto 18px;
+}
+
+.planner-summary > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 13px 16px;
+  border: 1px solid rgba(202, 216, 226, .86);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .76);
+  box-shadow: 0 8px 22px rgba(27, 47, 64, .035);
+}
+
+.planner-summary span {
+  color: var(--planner-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.planner-summary strong {
+  overflow: hidden;
+  color: var(--planner-ink);
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 265px) minmax(0, 1fr);
+  min-height: 740px;
+  overflow: hidden;
+  border: 1px solid #d5e0e8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(24, 45, 64, .09);
+}
+
+.planner-sidebar {
+  min-width: 0;
+  padding: 20px 16px;
+  border: 0;
+  border-right: 1px solid var(--planner-line);
+  background: linear-gradient(180deg, #f7fafc, #f0f5f8);
+}
+
+.side-heading {
+  margin-bottom: 5px;
+  color: var(--planner-ink);
+  font-size: 1.12rem;
+}
+
+.side-heading span {
+  color: var(--planner-blue);
+}
+
+.side-note {
+  display: block;
+  margin-bottom: 16px;
+  color: var(--planner-muted);
+  font-size: .82rem;
+}
+
+.project-banner {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid #cbdcf5;
+  border-radius: 10px;
+  background: #edf4ff;
+  color: #244a81;
+  font-size: .8rem;
+}
+
+.room-palette {
+  display: grid;
+  gap: 4px;
+}
+
+.room-tool-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  gap: 6px;
+}
+
+.room-tool {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--planner-ink);
+  font-size: .83rem;
+}
+
+.room-tool:hover,
+.room-tool:focus-visible {
+  border-color: #c9dafa;
+  outline: none;
+  background: #eaf2ff;
+}
+
+.room-tool .room-icon {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 7px;
+  background: #e3ecf8;
+  color: var(--planner-blue);
+  font-size: 1rem;
+}
+
+.room-tool b {
+  color: var(--planner-blue);
+  font-size: .95rem;
+}
+
+.room-remove-tool {
+  min-height: 42px;
+  border: 1px solid #e3c9c7;
+  border-radius: 10px;
+  background: #fff;
+  color: #a33b37;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.room-remove-tool:hover:not(:disabled),
+.room-remove-tool:focus-visible {
+  border-color: #e6aaa6;
+  outline: none;
+  background: #fff0ef;
+}
+
+.room-remove-tool:disabled {
+  border-color: #e5e9ec;
+  background: #f5f7f8;
+  color: #a5afb7;
+  cursor: not-allowed;
+}
+
+.opening-tools {
+  display: grid;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid #dce5eb;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .8);
+}
+
+.opening-tools > strong {
+  color: var(--planner-ink);
+  font-size: .82rem;
+}
+
+.opening-tools label {
+  display: grid;
+  gap: 5px;
+  color: #536779;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.opening-tools select,
+.opening-tools input {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid #cfdbe4;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--planner-ink);
+  font: inherit;
+}
+
+.opening-tool-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.opening-tool-buttons button {
+  min-height: 34px;
+  padding: 6px;
+  border: 1px solid #cbd9e4;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #34566e;
+  font: 700 .7rem 'DM Sans', sans-serif;
+}
+
+.opening-tool-buttons button:hover:not(:disabled),
+.opening-tool-buttons button:focus-visible {
+  border-color: #a9c5e0;
+  outline: none;
+  background: #edf4ff;
+  color: #2455b4;
+}
+
+.opening-tool-buttons button:disabled {
+  color: #9aa8b2;
+  cursor: not-allowed;
+}
+
+.opening-tools > p {
+  margin: 0;
+  color: var(--planner-muted);
+  font-size: .68rem;
+  line-height: 1.4;
+}
+
+.side-control {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.side-control label,
+.side-stack label,
+.room-dim-card label {
+  display: grid;
+  gap: 5px;
+  color: #536779;
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.side-control select,
+.side-control input,
+.side-stack input,
+.room-dim-card input {
+  width: 100%;
+  min-height: 39px;
+  padding: 8px 10px;
+  border: 1px solid #cfdbe4;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--planner-ink);
+  font: inherit;
+}
+
+.side-control.side-stack {
+  grid-template-columns: 1fr;
+  margin-top: 12px;
+}
+
+.side-dimension-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.room-dim-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid #dce5eb;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .78);
+}
+
+.room-dim-card > strong {
+  grid-column: 1 / -1;
+  color: var(--planner-ink);
+  font-size: .82rem;
+}
+
+.room-dim-card label {
+  font-size: .68rem;
+}
+
+.room-dim-card input {
+  min-height: 34px;
+  padding: 6px 8px;
+}
+
+.canvas-panel {
+  align-self: start;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  background: #fff;
+}
+
+.canvas-toolbar {
+  min-height: 56px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--planner-line);
+  background: #fbfcfd;
+  color: #536779;
+  font-size: .8rem;
+}
+
+.planner-view-status {
+  min-width: max-content;
+  font-weight: 800;
+}
+
+.status-dot {
+  background: #2aab78;
+}
+
+.planner-toolbar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.planner-view-switch,
+.planner-zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.planner-toolbar-controls .mini-toggle {
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid #d5e0e8;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: none;
+  color: #344b5c;
+  font: 700 .75rem 'DM Sans', sans-serif;
+}
+
+.planner-toolbar-controls button:hover,
+.planner-toolbar-controls button:focus-visible,
+.planner-toolbar-controls .mini-toggle.is-active {
+  border-color: #b7ccef;
+  outline: 2px solid transparent;
+  background: #edf4ff;
+  color: #2455b4;
+}
+
+.planner-toolbar-controls #view-toggle.is-active {
+  background: #3269db;
+  color: #fff;
+}
+
+.planner-toolbar-controls label {
+  gap: 5px;
+  color: var(--planner-muted);
+  font-size: .7rem;
+}
+
+.planner-toolbar-controls label select {
+  max-width: 112px;
+  min-height: 32px;
+  padding: 5px 7px;
+  border-color: #d5e0e8;
+  border-radius: 7px;
+  font: 700 .72rem 'DM Sans', sans-serif;
+}
+
+.planner-toolbar-controls #zoom-level {
+  min-width: 40px;
+  color: var(--planner-ink);
+  font-size: .72rem;
+  text-align: center;
+}
+
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8eef2;
+  background: #fff;
+}
+
+.summary-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid #e0e8ee;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: var(--planner-muted);
+  font-size: .72rem;
+}
+
+.summary-pill strong {
+  color: var(--planner-ink);
+  font-size: .78rem;
+}
+
+.floor-plan-wrap {
+  position: relative;
+  display: grid;
+  min-height: 540px;
+  flex: 1 1 auto;
+  place-items: center;
+  overflow: auto;
+  padding: 28px;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(224, 234, 241, .56), transparent 68%),
+    #f6f9fb;
+}
+
+.floor-plan-wrap svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(100%, 980px);
+  min-width: 560px;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 10px 18px rgba(24, 45, 64, .08));
+  transform-origin: center;
+}
+
+.planner-plot-outline {
+  fill: none;
+  stroke: #778b9c;
+  stroke-width: 2;
+  stroke-dasharray: 8 5;
+}
+
+.planner-plot-fill {
+  fill: #fbfcfd;
+}
+
+.plan-grid {
+  position: absolute;
+  inset: 20px;
+  background-image:
+    linear-gradient(rgba(103, 134, 157, .08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(103, 134, 157, .08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.plan-grid.hidden {
+  display: none;
+}
+
+.planner-compass {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid #d7e2ea;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 7px 18px rgba(25, 45, 62, .08);
+  color: #456078;
+  font-size: .65rem;
+  font-weight: 800;
+}
+
+.planner-compass [data-plan-side] {
+  position: absolute;
+}
+
+.planner-compass [data-plan-side] {
+  font-size: .48rem;
+  line-height: 1;
+}
+
+.planner-compass [data-plan-side="0"] { top: 4px; left: 50%; transform: translateX(-50%); }
+.planner-compass [data-plan-side="1"] { top: 10px; right: 8px; }
+.planner-compass [data-plan-side="2"] { top: 50%; right: 4px; transform: translateY(-50%); }
+.planner-compass [data-plan-side="3"] { right: 8px; bottom: 10px; }
+.planner-compass [data-plan-side="4"] { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.planner-compass [data-plan-side="5"] { bottom: 10px; left: 7px; }
+.planner-compass [data-plan-side="6"] { top: 50%; left: 4px; transform: translateY(-50%); }
+.planner-compass [data-plan-side="7"] { top: 10px; left: 7px; }
+.planner-compass [data-plan-side="0"].is-north { color: #3269db; }
+
+.planner-dimension-line {
+  fill: none;
+  stroke: #71879a;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.planner-dimension-label {
+  fill: #586f82;
+  font: 700 11px 'DM Sans', sans-serif;
+}
+
+.room-measure-line,
+.architectural-measure-line {
+  fill: none;
+  stroke: #3269db;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.room-measure-label {
+  fill: #2455b4;
+  font: 700 8px 'DM Sans', sans-serif;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-linejoin: round;
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+.architectural-inspector {
+  display: grid;
+  grid-template-columns: minmax(140px, auto) minmax(110px, auto) minmax(180px, 1fr);
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dce5eb;
+  background: #f3f7fc;
+  color: #172b3b;
+  font-size: .78rem;
+}
+
+.architectural-inspector[hidden] {
+  display: none !important;
+}
+
+.architectural-inspector > strong {
+  color: #2455b4;
+  font-size: .86rem;
+  text-transform: capitalize;
+}
+
+.architectural-dimensions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.architectural-dimensions label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.architectural-dimensions input {
+  width: 70px;
+  min-height: 32px;
+  padding: 5px 7px;
+  border: 1px solid #cfdbe4;
+  border-radius: 7px;
+  background: #fff;
+  color: #172b3b;
+}
+
+.architectural-inspector p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #617283;
+  font-size: .72rem;
+}
+
+.room-instance {
+  cursor: grab;
+  touch-action: none;
+}
+
+.room-instance:active {
+  cursor: grabbing;
+}
+
+.room-rect {
+  stroke: #536f86;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.room-instance.is-parking .room-rect {
+  fill: #e2e8e8;
+  stroke: #73838b;
+  stroke-dasharray: 6 3;
+}
+
+.parking-bay-marking {
+  fill: none;
+  stroke: #73838b;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.room-instance:hover .room-rect,
+.room-instance:focus .room-rect {
+  stroke: #3269db;
+  stroke-width: 3;
+}
+
+.room-instance:focus {
+  outline: none;
+}
+
+.room-label {
+  fill: #1b3448;
+  font: 700 13px 'DM Sans', sans-serif;
+  pointer-events: none;
+}
+
+.room-size {
+  fill: #61788b;
+  font: 11px 'DM Sans', sans-serif;
+  pointer-events: none;
+}
+
+.planner-room-index {
+  fill: #3269db;
+  font: 700 10px 'DM Sans', sans-serif;
+  pointer-events: none;
+}
+
+.architectural-element {
+  cursor: move;
+  touch-action: none;
+}
+
+.architectural-element-shape {
+  fill: #dce9f4;
+  stroke: #42627b;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.architectural-hit-target {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.architectural-element.is-door .architectural-element-shape {
+  fill: #d9b18a;
+  stroke: #815b3a;
+}
+
+.architectural-element.is-window .architectural-element-shape {
+  fill: #b9e6ef;
+  stroke: #2588a1;
+}
+
+.architectural-element.is-ventilator .architectural-element-shape {
+  fill: #c9dde4;
+  stroke: #4a7887;
+}
+
+.architectural-element.is-skylight .architectural-element-shape {
+  fill: #b9e6ef;
+  stroke: #2588a1;
+}
+
+.architectural-element.is-stairs .architectural-element-shape {
+  fill: #e6e9ed;
+  stroke: #697887;
+}
+
+.architectural-element.is-selected .architectural-element-shape,
+.architectural-element:hover .architectural-element-shape,
+.architectural-element:focus .architectural-element-shape {
+  stroke: #1769d2;
+  stroke-width: 2.5;
+}
+
+.architectural-element:focus {
+  outline: none;
+}
+
+.architectural-detail {
+  fill: none;
+  stroke: #40576b;
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.architectural-name,
+.architectural-size {
+  fill: #172b3b;
+  font: 700 8px 'DM Sans', sans-serif;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-linejoin: round;
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+.architectural-size {
+  fill: #2455b4;
+  font-size: 8px;
+}
+
+.room-instance.is-overflow .room-rect {
+  stroke: #d64d42;
+  stroke-dasharray: 6 4;
+}
+
+.planner-alert {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1d59d;
+  background: #fff7e6;
+  color: #815515;
+  font-size: .8rem;
+  line-height: 1.45;
+}
+
+.planner-alert[hidden],
+.canvas-3d[hidden],
+.planner-3d-status[hidden] {
+  display: none !important;
+}
+
+.canvas-3d {
+  position: relative;
+  width: 100%;
+  min-height: 540px;
+  flex: 1 1 auto;
+  overflow: hidden;
+  background: linear-gradient(180deg, #dce9f2, #f2f5f2);
+  touch-action: none;
+}
+
+.canvas-3d canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.planner-3d-compass {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  display: grid;
+  grid-template-columns: 30px auto;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 11px;
+  border: 1px solid rgba(177, 195, 207, .8);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 5px 16px rgba(20, 40, 58, .08);
+  color: #476074;
+  font-size: .72rem;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.planner-north-arrow {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: #3269db;
+  font-size: 1.35rem;
+  line-height: 1;
+  transition: transform .2s ease;
+}
+
+.planner-3d-status {
+  position: absolute;
+  z-index: 4;
+  inset: auto 16px 16px;
+  padding: 13px 16px;
+  border: 1px solid #f0d195;
+  border-radius: 12px;
+  background: rgba(255, 249, 235, .97);
+  color: #74500e;
+  font-size: .84rem;
+}
+
+.planner-canvas-hint {
+  margin: 0;
+  padding: 11px 16px;
+  border-top: 1px solid #e5ecf1;
+  color: var(--planner-muted);
+  font-size: .75rem;
+  line-height: 1.5;
+}
+
+.planner-app button:focus-visible,
+.planner-app select:focus-visible,
+.planner-app input:focus-visible {
+  outline: 3px solid rgba(50, 105, 219, .35);
+  outline-offset: 2px;
+}
+
+.dark-mode .planner-app {
+  --planner-ink: #eaf2f8;
+  --planner-muted: #a9bac8;
+  --planner-line: #344a5b;
+  background: linear-gradient(180deg, #172733, #111b22);
+}
+
+.dark-mode .planner-summary > div,
+.dark-mode .planner-workspace,
+.dark-mode .canvas-panel,
+.dark-mode .canvas-toolbar,
+.dark-mode .summary-strip,
+.dark-mode .summary-pill,
+.dark-mode .room-dim-card,
+.dark-mode .room-tool,
+.dark-mode .room-remove-tool,
+.dark-mode .opening-tools,
+.dark-mode .side-control input,
+.dark-mode .side-control select,
+.dark-mode .side-stack input,
+.dark-mode .room-dim-card input {
+  border-color: #344a5b;
+  background: #1a2a36;
+  color: #eaf2f8;
+}
+
+.dark-mode .opening-tools label {
+  color: #a9bac8;
+}
+
+.dark-mode .opening-tools select,
+.dark-mode .opening-tools input {
+  border-color: #344a5b;
+  background: #1a2a36;
+  color: #eaf2f8;
+}
+
+.dark-mode .opening-tool-buttons button {
+  border-color: #405669;
+  background: #1b2c39;
+  color: #dce8f1;
+}
+
+.dark-mode .opening-tool-buttons button:hover:not(:disabled) {
+  background: #203d68;
+  color: #dce8ff;
+}
+
+.dark-mode .room-remove-tool:disabled {
+  border-color: #344a5b;
+  background: #15242e;
+  color: #758795;
+}
+
+.dark-mode .planner-sidebar {
+  border-color: #344a5b;
+  background: #15242e;
+}
+
+.dark-mode .planner-toolbar-controls .mini-toggle {
+  border-color: #405669;
+  background: #1b2c39;
+  color: #dce8f1;
+}
+
+.dark-mode .planner-toolbar-controls .mini-toggle.is-active {
+  background: #203d68;
+  color: #dce8ff;
+}
+
+.dark-mode .floor-plan-wrap {
+  background: #e9eff3;
+}
+
+@media (max-width: 1050px) {
+  .planner-workspace {
+    grid-template-columns: 225px minmax(0, 1fr);
+  }
+
+  .planner-sidebar {
+    padding: 16px 12px;
+  }
+
+  .canvas-toolbar {
+    align-items: flex-start;
+  }
+
+  .planner-toolbar-controls {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .planner-app {
+    padding: 13px;
+  }
+
+  .planner-top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .planner-actions {
+    width: 100%;
+  }
+
+  .planner-actions .editor-button {
+    flex: 1;
+  }
+
+  .planner-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .planner-summary > div {
+    padding: 10px 12px;
+  }
+
+  .planner-workspace {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .planner-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--planner-line);
+  }
+
+  .room-palette {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .side-dimension-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .canvas-toolbar {
+    display: grid;
+    gap: 9px;
+    padding: 11px;
+  }
+
+  .architectural-inspector {
+    grid-template-columns: 1fr 1fr;
+    padding: 11px;
+  }
+
+  .architectural-dimensions {
+    grid-column: 1 / -1;
+  }
+
+  .planner-toolbar-controls {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .planner-toolbar-controls .mini-toggle {
+    min-height: 38px;
+  }
+
+  .planner-toolbar-controls label {
+    flex: 1 1 auto;
+  }
+
+  .planner-toolbar-controls label select {
+    max-width: 135px;
+  }
+
+  .floor-plan-wrap,
+  .canvas-3d {
+    min-height: 420px;
+  }
+
+  .floor-plan-wrap {
+    padding: 20px 10px;
+  }
+
+  .floor-plan-wrap svg {
+    min-width: 500px;
+  }
+}
+
+@media (max-width: 420px) {
+  .side-dimension-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .room-palette {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-toolbar-controls label {
+    min-width: 42%;
+  }
+
+  .planner-toolbar-controls label select {
+    max-width: 110px;
+  }
+}

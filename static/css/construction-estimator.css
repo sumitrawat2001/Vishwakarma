@@ -1,0 +1,57 @@
+.construction-estimator-page{max-width:1100px;margin:0 auto}
+.construction-estimator-hero{text-align:center;margin-bottom:28px}
+.construction-estimator-hero h1{margin:10px 0 12px;font-size:clamp(2.7rem,6vw,5.1rem);line-height:.98}
+.construction-estimator-hero p:last-child{max-width:650px;margin:0 auto;color:var(--muted)}
+.construction-estimator-card{max-width:760px;margin:0 auto;padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:0 12px 34px var(--shadow)}
+.construction-estimator-section{padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.construction-estimator-section h2,.construction-rate-section h2{display:flex;align-items:center;gap:10px;margin:0 0 18px;font-size:1.05rem;letter-spacing:-.01em}
+.construction-section-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:var(--bg-soft);color:var(--orange);font-size:.9rem}
+.construction-estimator-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.construction-estimator-card label{margin:0;font-size:.78rem}
+.construction-estimator-card select,.construction-estimator-card input[type="number"]{margin-top:7px;min-height:44px;border-radius:9px;background:var(--paper)}
+.construction-area-input,.construction-rate-input{display:flex;align-items:center;margin-top:7px;border:1px solid var(--line);border-radius:9px;background:var(--paper);overflow:hidden}
+.construction-area-input input,.construction-rate-input input{flex:1;margin:0;border:0;background:transparent;outline:0}
+.construction-area-input>span,.construction-rate-input>span{padding:0 10px;color:var(--muted);font-size:.76rem}
+.construction-estimator-card small{display:flex;align-items:center;gap:7px;margin-top:8px;color:var(--muted);font-size:.68rem;font-weight:400}
+.construction-estimator-card small input{width:auto;min-height:auto;margin:0}
+.construction-floor-control{display:grid;align-content:start;gap:7px}
+.construction-floor-control>div:first-child{display:flex;justify-content:space-between;font-size:.78rem}
+.construction-floor-control input[type="range"]{height:6px;padding:0;border:0;accent-color:var(--orange)}
+.construction-floor-scale{display:flex;justify-content:space-between;color:var(--muted);font-size:.68rem}
+.construction-quality-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.construction-quality-option{position:relative;cursor:pointer}
+.construction-quality-option input{position:absolute;opacity:0}
+.construction-quality-option span{display:block;padding:13px 8px;border:1px solid var(--line);border-radius:10px;text-align:center;background:var(--paper);font-size:.82rem}
+.construction-quality-option input:checked+span{border-color:var(--orange);background:var(--bg-soft);color:var(--orange);box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 12%,transparent)}
+.construction-advanced{margin:-4px 0 20px;border:1px solid transparent;border-radius:10px}
+.construction-advanced summary{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;list-style:none;cursor:pointer;font-size:.85rem;font-weight:700}
+.construction-advanced summary::-webkit-details-marker{display:none}
+.construction-advanced[open]{border-color:var(--line);padding-bottom:12px}
+.construction-advanced p{margin:0;padding:0 14px;color:var(--muted);font-size:.76rem}
+.construction-rate-section{margin-bottom:18px}
+.construction-rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.construction-estimate-submit{width:100%;min-height:52px;border:0;border-radius:12px;background:var(--orange);color:#fff;font:700 .95rem 'DM Sans';cursor:pointer}
+.construction-estimate-submit span{float:right}
+.construction-estimate-results{max-width:760px;margin:24px auto;padding:24px!important;border:1px solid var(--line);border-radius:18px}
+.construction-result-heading{text-align:center}
+.construction-result-heading h2{margin:8px 0;color:var(--orange)!important;font-size:clamp(2.5rem,7vw,4rem)!important}
+.construction-result-heading p{margin:5px 0}
+.construction-area-summary{color:var(--muted)}
+.construction-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;text-align:left}
+.construction-result-grid article{padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.construction-result-grid h3{margin:0 0 10px;font-size:.95rem}
+.construction-result-grid ul{margin:0;padding:0;list-style:none}
+.construction-result-grid li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.78rem}
+.construction-result-grid li:last-child{border:0}
+.construction-material-table{grid-column:1/-1}
+.construction-material-table table{width:100%;border-collapse:collapse;font-size:.78rem}
+.construction-material-table th,.construction-material-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+.construction-material-table th{color:var(--muted);font-size:.68rem;text-transform:uppercase}
+@media(max-width:650px){
+  .construction-estimator-page{padding-left:5vw;padding-right:5vw}
+  .construction-estimator-card{padding:18px}
+  .construction-estimator-grid,.construction-rate-grid,.construction-result-grid{grid-template-columns:1fr}
+  .construction-quality-grid{grid-template-columns:1fr 1fr}
+  .construction-material-table{grid-column:auto}
+  .construction-estimator-hero h1{font-size:2.65rem}
+}

@@ -1,1 +1,133 @@
-{% extends 'base.html' %}{% block title %}Material Estimator{% endblock %}{% block content %}<section class="section"><p class="eyebrow">02 / MATERIALS</p><h1>Know the<br><em>quantities.</em></h1><form class="tool-form inline-form" method="post"><label>Built-up area<input type="number" min="1" step=".1" name="built_up_area" value="{{ area or '' }}" required></label><label>Floors<input type="number" min="1" max="3" name="floors" value="1"></label><button class="button primary">Estimate →</button></form>{% if estimate %}<div class="table-wrap"><table><tr><th>Material</th><th>Approximate quantity</th><th>Assumption</th><th></th></tr>{% for key, value in estimate.items() %}<tr><td>{{ key|title }}</td><td>{{ value }}</td><td>Area-based guide</td><td><button class="button secondary" type="button" data-resource-save data-resource="materials" data-resource-payload='{{ {"name": key|title, "category": "estimate", "unit": "estimated", "unit_cost": 0, "quantity": value}|tojson }}'>Save</button></td></tr>{% endfor %}</table></div><p class="muted">Approximate assumptions only. Actual quantities vary by design, specification, soil, and local practice.</p>{% endif %}</section><script src="{{ url_for('static', filename='js/resource-api.js') }}"></script>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Material Estimator{% endblock %}
+{% block content %}
+<section class="section materials-page">
+  <p class="eyebrow">02 / MATERIALS</p>
+  <h1>Know the<br><em>quantities.</em></h1>
+  <p class="materials-lead">Dimension-based masonry and concrete-volume estimates. Use measurements from your drawings; these tools do not certify a design or determine structural safety.</p>
+  <p><a class="button primary" href="{{ url_for('material_estimation') }}">Open advanced material & location estimator →</a></p>
+
+  {% if detail_error %}
+  <div class="materials-basis" role="alert"><strong>Check the measurements</strong><p>{{ detail_error }}</p></div>
+  {% endif %}
+
+  <div class="simulation-grid">
+    <article class="simulation-card">
+      <h2>Brickwork and mortar</h2>
+      <p>Enter the measured wall size, openings, brick size and the mortar ratio specified for your work.</p>
+      <form class="tool-form" method="post">
+        <input type="hidden" name="estimate_type" value="brickwork">
+        <div class="form-grid two-col">
+          <label>Wall length (m)<input type="number" name="wall_length_m" min="0.01" step="0.01" value="{{ request.form.get('wall_length_m', '') }}" required></label>
+          <label>Wall height (m)<input type="number" name="wall_height_m" min="0.01" step="0.01" value="{{ request.form.get('wall_height_m', '') }}" required></label>
+          <label>Wall thickness (m)<input type="number" name="wall_thickness_m" min="0.01" step="0.01" value="{{ request.form.get('wall_thickness_m', '') }}" required></label>
+          <label>Total door/window opening area (m²)<input type="number" name="openings_area_m2" min="0" step="0.01" value="{{ request.form.get('openings_area_m2', '0') }}"></label>
+          <label>Brick length (mm)<input type="number" name="brick_length_mm" min="1" step="1" value="{{ request.form.get('brick_length_mm', '') }}" required></label>
+          <label>Brick height (mm)<input type="number" name="brick_height_mm" min="1" step="1" value="{{ request.form.get('brick_height_mm', '') }}" required></label>
+          <label>Brick width (mm)<input type="number" name="brick_width_mm" min="1" step="1" value="{{ request.form.get('brick_width_mm', '') }}" required></label>
+          <label>Mortar joint (mm)<input type="number" name="mortar_joint_mm" min="1" step="1" value="{{ request.form.get('mortar_joint_mm', '10') }}" required></label>
+          <label>Cement part in mortar ratio<input type="number" name="cement_ratio" min="0.01" step="0.01" value="{{ request.form.get('cement_ratio', '1') }}" required></label>
+          <label>Sand part in mortar ratio<input type="number" name="sand_ratio" min="0.01" step="0.01" value="{{ request.form.get('sand_ratio', '6') }}" required></label>
+          <label>Dry-volume factor<input type="number" name="mortar_dry_factor" min="0.01" max="3" step="0.01" value="{{ request.form.get('mortar_dry_factor', '1.33') }}" required></label>
+          <label>Wastage allowance (%)<input type="number" name="wastage_percent" min="0" max="100" step="0.5" value="{{ request.form.get('wastage_percent', '5') }}"></label>
+        </div>
+        <button class="button primary" type="submit">Estimate brickwork →</button>
+      </form>
+      {% if brickwork_estimate %}
+      <div class="materials-basis">
+        <strong>Dimension-based estimate</strong>
+        <p>Net wall area: {{ brickwork_estimate.net_wall_area_m2 }} m² · Masonry volume: {{ brickwork_estimate.net_masonry_volume_m3 }} m³</p>
+        <p>{{ brickwork_estimate.assumptions }}</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Material</th><th>Estimated quantity</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Bricks</td><td>{{ brickwork_estimate.bricks_pieces }} pieces</td><td><button class="button secondary" type="button" data-resource-save data-resource="materials" data-resource-payload='{{ {"name": "Bricks", "category": "dimension-based masonry estimate", "unit": "pieces", "unit_cost": 0, "quantity": brickwork_estimate.bricks_pieces}|tojson }}'>Save</button></td></tr>
+            <tr><td>Cement</td><td>{{ brickwork_estimate.cement_bags_50kg }} 50 kg bags</td><td><button class="button secondary" type="button" data-resource-save data-resource="materials" data-resource-payload='{{ {"name": "Cement for mortar", "category": "dimension-based masonry estimate", "unit": "50 kg bag(s)", "unit_cost": 0, "quantity": brickwork_estimate.cement_bags_50kg}|tojson }}'>Save</button></td></tr>
+            <tr><td>Sand for mortar</td><td>{{ brickwork_estimate.sand_m3 }} m³</td><td><button class="button secondary" type="button" data-resource-save data-resource="materials" data-resource-payload='{{ {"name": "Sand for mortar", "category": "dimension-based masonry estimate", "unit": "m³ (loose volume estimate)", "unit_cost": 0, "quantity": brickwork_estimate.sand_m3}|tojson }}'>Save</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </article>
+
+    <article class="simulation-card">
+      <h2>Concrete volume from dimensions</h2>
+      <p>Enter only components present in your engineer-provided structural drawings. Leave unused component groups blank.</p>
+      <form class="tool-form" method="post">
+        <input type="hidden" name="estimate_type" value="concrete">
+        <div class="form-grid two-col">
+          <label>Slab area (m²)<input type="number" name="slab_area_m2" min="0.01" step="0.01" value="{{ request.form.get('slab_area_m2', '') }}"></label>
+          <label>Slab thickness (mm)<input type="number" name="slab_thickness_mm" min="1" step="1" value="{{ request.form.get('slab_thickness_mm', '') }}"></label>
+          <label>Number of columns<input type="number" name="column_count" min="1" step="1" value="{{ request.form.get('column_count', '') }}"></label>
+          <label>Column width (mm)<input type="number" name="column_width_mm" min="1" step="1" value="{{ request.form.get('column_width_mm', '') }}"></label>
+          <label>Column depth (mm)<input type="number" name="column_depth_mm" min="1" step="1" value="{{ request.form.get('column_depth_mm', '') }}"></label>
+          <label>Column height (m)<input type="number" name="column_height_m" min="0.01" step="0.01" value="{{ request.form.get('column_height_m', '') }}"></label>
+          <label>Number of beams<input type="number" name="beam_count" min="1" step="1" value="{{ request.form.get('beam_count', '') }}"></label>
+          <label>Beam width (mm)<input type="number" name="beam_width_mm" min="1" step="1" value="{{ request.form.get('beam_width_mm', '') }}"></label>
+          <label>Beam depth (mm)<input type="number" name="beam_depth_mm" min="1" step="1" value="{{ request.form.get('beam_depth_mm', '') }}"></label>
+          <label>Total length per beam (m)<input type="number" name="beam_length_m" min="0.01" step="0.01" value="{{ request.form.get('beam_length_m', '') }}"></label>
+          <label>Number of footings<input type="number" name="footing_count" min="1" step="1" value="{{ request.form.get('footing_count', '') }}"></label>
+          <label>Footing length (mm)<input type="number" name="footing_length_mm" min="1" step="1" value="{{ request.form.get('footing_length_mm', '') }}"></label>
+          <label>Footing width (mm)<input type="number" name="footing_width_mm" min="1" step="1" value="{{ request.form.get('footing_width_mm', '') }}"></label>
+          <label>Footing depth (mm)<input type="number" name="footing_depth_mm" min="1" step="1" value="{{ request.form.get('footing_depth_mm', '') }}"></label>
+        </div>
+        <button class="button primary" type="submit">Calculate concrete volume →</button>
+      </form>
+      {% if concrete_estimate %}
+      <div class="materials-basis">
+        <strong>Concrete volume only</strong>
+        {% for component, volume in concrete_estimate.components_m3.items() %}
+        <p>{{ component|title }}: {{ volume }} m³</p>
+        {% endfor %}
+        <p><b>Total:</b> {{ concrete_estimate.total_m3 }} m³</p>
+        <p>{{ concrete_estimate.assumptions }}</p>
+      </div>
+      <button class="button secondary" type="button" data-resource-save data-resource="materials" data-resource-payload='{{ {"name": "Concrete volume", "category": "structural drawing quantity", "unit": "m³ (geometric volume)", "unit_cost": 0, "quantity": concrete_estimate.total_m3}|tojson }}'>Save volume</button>
+      {% endif %}
+    </article>
+  </div>
+
+  <details class="materials-legacy">
+    <summary>Legacy area-based estimate (rough planning only)</summary>
+    <p class="materials-lead">This older area multiplier does not use actual wall or structural dimensions.</p>
+    <form class="tool-form inline-form" method="post">
+      <label>Built-up area per floor (sq ft)
+        <input type="number" min="1" step=".1" name="built_up_area" value="{{ area or '' }}" required>
+      </label>
+      <label>Number of floors
+        <input type="number" min="1" max="5" name="floors" value="{{ floors }}" required>
+      </label>
+      <button class="button primary" type="submit">Estimate →</button>
+    </form>
+
+  {% if estimate %}
+  <div class="materials-basis">
+    <strong>Calculation, simple terms</strong>
+    <p>Cement estimate = area per floor × floors × 0.45 bags, rounded up to a whole 50 kg bag. Your entered area is {{ area }} sq ft per floor × {{ floors }} floor(s) = {{ total_estimated_area|round(2) }} sq ft total.</p>
+    <p><b>Important:</b> Cement bags are a rough planning assumption, not an IS-code quantity takeoff. Other materials use legacy factors whose physical output units are unspecified; they are not verified quantities for buying materials.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Material</th><th>Factor / sq ft / floor</th><th>Estimated quantity</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for key, value in estimate.items() %}
+        <tr>
+          <td>{{ key|title }}</td>
+          <td>{{ factors[key] }}</td>
+          <td>{{ value }} {{ units[key] }}</td>
+          <td><button class="button secondary" type="button" data-resource-save data-resource="materials" data-resource-payload='{{ {"name": key|title, "category": "area-based estimate", "unit": units[key], "unit_cost": 0, "quantity": value}|tojson }}'>Save</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">An IS-code quantity takeoff needs drawings and member dimensions/specifications. Concrete mix proportioning under IS 10262 needs project-specific material and mix inputs; strength must be established through suitable design and laboratory testing. Consult a qualified structural engineer/quantity surveyor.</p>
+  {% endif %}
+  </details>
+</section>
+<script src="{{ url_for('static', filename='js/resource-api.js') }}"></script>
+{% endblock %}
