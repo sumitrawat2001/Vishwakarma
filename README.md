@@ -130,6 +130,8 @@ A `render.yaml` file is included for Render deployment.
 ## Vercel deployment
 Vercel needs both `SECRET_KEY` and `MONGO_URI` configured as non-empty project environment variables. Generate a strong session key locally with `python -c "import secrets; print(secrets.token_hex(32))"`, add it under Vercel Project Settings → Environment Variables, then redeploy. Do not use the development fallback as a production secret. If `SECRET_KEY` is missing or blank on Vercel, authentication routes return an explicit configuration error instead of failing with a generic 500.
 
+Vercel detects the root `app.py` as the Flask application. Keep request paths routed directly to it; rewriting every URL to `/api/index` changes the path Flask receives and can route requests such as `/health` into the protected resource API.
+
 ## Structure
 `app.py` contains routes and calculation services; `templates/` contains Jinja pages; `static/` contains CSS and JavaScript; `tests/` contains regression tests.
 

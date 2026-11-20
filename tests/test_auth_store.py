@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 import unittest
@@ -36,10 +37,13 @@ class MongoConnectionTests(unittest.TestCase):
 
         close_client.assert_not_called()
 
-    def test_vercel_entrypoint_uses_the_flask_application(self):
-        from api.index import app as vercel_app
+    def test_vercel_preserves_request_paths_for_root_flask_entrypoint(self):
+        project_root = Path(__file__).resolve().parents[1]
+        vercel_config = json.loads((project_root / 'vercel.json').read_text(encoding='utf-8'))
 
-        self.assertIs(vercel_app, app)
+        self.assertNotIn('rewrites', vercel_config)
+        self.assertIn('app.py', vercel_config.get('functions', {}))
+        self.assertFalse((project_root / 'api' / 'index.py').exists())
 
     def test_vercel_auth_routes_report_missing_mongodb_configuration(self):
         client = app.test_client()
